@@ -16,7 +16,15 @@
   ```sh
   cd End2Friends
   ```
-  3. Start the server 
+  3. Install dependencies 
+  ```sh
+  pip install -r requirements.txt
+  ```
+  4. Run database migrations 
+  ```sh
+  python manage.py migrate 
+  ```
+  4. Start the server 
   ```sh
   python manage.py runserver
   ```
