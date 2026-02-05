@@ -1,3 +1,11 @@
+asgiref==3.11.1
+Django==6.0.2
+django-redis==6.0.0
+pillow==12.1.0
 psycopg==3.3.2
 psycopg-binary==3.3.2
+psycopg2-binary==2.9.11
+redis==7.1.0
+sqlparse==0.5.5
 typing_extensions==4.15.0
+tzdata==2025.3
