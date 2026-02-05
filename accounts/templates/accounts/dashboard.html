@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - End2Friend</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=drone_2" />
+</head>
+
+<body class="varela-round-regular">
+    <section class="base-background min-h-screen flex items-center justify-center">
+        <div class="flex flex-col items-center gap-4">
+            <div class="flex login-title">
+                <span class="material-symbols-outlined">drone_2</span>
+                <h1 class="pl-2">End2Friend</h1>
+            </div>
+
+            <div class="flex flex-col rounded-2xl shadow-lg max-w-3xl p-10 bg-white text-center">
+                <h1 class="font-bold text-gray-900 text-2xl mb-4">Welcome, {{ user.username }}!</h1>
+                <p class="text-gray-600 mb-6">You are successfully logged in.</p>
+                
+                <a href="{% url 'logout' %}" 
+                   class="login-btn rounded-lg bg-red-400 hover:bg-red-500 text-white p-3">
+                    Log out
+                </a>
+            </div>
+        </div>
+    </section>
+</body>
+
+<style>
+    .varela-round-regular {
+        font-family: "Varela Round", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+    }
+
+    .login-title {
+        color: white;
+    }
+
+    .login-btn {
+        transition: transform 0.5s;
+    }
+
+    .login-btn:hover {
+        transform: translateY(-3px);
+    }
+
+    .base-background {
+        background: #cad7db;
+        background: radial-gradient(circle, rgba(202, 215, 219, 1) 0%, rgba(185, 200, 213, 1) 12%, rgba(174, 191, 210, 1) 20%, rgba(160, 179, 205, 1) 22%, rgba(132, 154, 196, 1) 36%, rgba(164, 180, 211, 1) 63%, rgba(203, 212, 230, 1) 79%, rgba(250, 251, 253, 1) 98%);
+    }
+</style>
+
+</html>
