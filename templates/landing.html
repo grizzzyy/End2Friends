@@ -1,22 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px 20px;">
-    <h1>Welcome to End2Friend</h1>
-    <p style="font-size: 1.2rem; margin-top: 10px;">
-        A simple platform to study together, stay organized, and connect with friends.
+<div style="text-align: center; padding: 20px;">
+    <h1 style="font-size: 2.2rem; color: #6d28d9; margin-bottom: 10px;">
+        Welcome to End2Friend 
+    </h1>
+
+    <p style="font-size: 1.2rem; color: #555; max-width: 500px; margin: 0 auto;">
+        Your cozy space to study together, stay organized, and keep your friends close.
     </p>
 
     <div style="margin-top: 30px;">
-        <a href="{% url 'login' %}" 
-           style="padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-right: 10px;">
+        <a href="{% url 'login' %}"
+           style="padding: 12px 24px; background: #a78bfa; color: white; text-decoration: none; border-radius: 10px; margin-right: 10px; font-size: 1rem;">
            Login
         </a>
 
-        <a href="{% url 'register' %}" 
-           style="padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+        <a href="{% url 'register' %}"
+           style="padding: 12px 24px; background: #c084fc; color: white; text-decoration: none; border-radius: 10px; font-size: 1rem;">
            Create Account
         </a>
     </div>
+
+    <p style="margin-top: 25px; font-size: 0.9rem; color: #777;">
+        New here? Join us and start your study journey today ✨
+    </p>
 </div>
 {% endblock %}

@@ -2,19 +2,75 @@
 <html>
 <head>
     <title>End2Friend</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f7f4ff;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        header {
+            background: #a78bfa;
+            padding: 15px 20px;
+            color: white;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+        }
+
+        nav {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        nav a {
+            display: inline-block;
+            margin: 0 10px;
+            padding: 10px 18px;
+            background: #c4b5fd;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: 0.2s;
+        }
+
+        nav a:hover {
+            background: #a78bfa;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+    </style>
 </head>
+
 <body>
 
+<header>
+    End2Friend
+</header>
+
+<nav>
     {% if user.is_authenticated %}
-        <p>Logged in as {{ user.username }}</p>
+        <span>Welcome, {{ user.username }}!</span>
         <a href="{% url 'logout' %}">Logout</a>
+        <a href="{% url 'dashboard' %}">Dashboard</a>
     {% else %}
         <a href="{% url 'login' %}">Login</a>
         <a href="{% url 'register' %}">Register</a>
     {% endif %}
+</nav>
 
-    <hr>
-
+<div class="container">
     {% block content %}{% endblock %}
+</div>
+
 </body>
 </html>
