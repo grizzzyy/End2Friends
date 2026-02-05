@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; text-align: center; padding: 40px 20px;">
+    <h1>Welcome to End2Friend</h1>
+    <p style="font-size: 1.2rem; margin-top: 10px;">
+        A simple platform to study together, stay organized, and connect with friends.
+    </p>
+
+    <div style="margin-top: 30px;">
+        <a href="{% url 'login' %}" 
+           style="padding: 10px 20px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; margin-right: 10px;">
+           Login
+        </a>
+
+        <a href="{% url 'register' %}" 
+           style="padding: 10px 20px; background: #28a745; color: white; text-decoration: none; border-radius: 5px;">
+           Create Account
+        </a>
+    </div>
+</div>
+{% endblock %}
