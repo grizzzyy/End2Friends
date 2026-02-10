@@ -16,7 +16,8 @@
 
     <!-- Icon -->
     <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=drone_2" />
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
 </head>
 
 <body class="varela-round-regular">
@@ -34,19 +35,62 @@
                 <!-- Form -->
                 <form class="flex flex-col gap-4" method="post">
                     {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined">
+                                error
+                            </span>
+                            <div class="pl-2">
+                                {{form.non_field_errors}}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <h1 class="font-bold text-gray-900 text-center text-xl">Welcome back!</h1>
                     <h3 class="font-small text-gray-500 text-center">Enter your details to access your account.</h3>
 
                     <label class="mt-4" for="username">Username</label>
-                    <input class="border-1 rounded-md border-gray-300 p-2" type="text" name="username"
-                    placeholder="Enter your Username"
-                    required>
+                    <input
+                        class="border-1 rounded-md border-gray-300 p-2 {% if form.username.errors %}is-invalid{% endif %}"
+                        type="text" name="username" value="{{form.username.value|default_if_none:''}}"
+                        placeholder="Enter your Username" required>
+
+                    <!-- Display username error -->
+                    {% if form.username.errors %}
+                    <div class="bg-red-100 border-t-4 border-red-500 rounded-b text-red-900 px-4 py-3 shadow-md">
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined">
+                                error
+                            </span>
+                            <div class="pl-2">
+                                {{form.username.errors}}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <label class="mt-2" for="password">Password</label>
-                    <input class="border-1 rounded-md border-gray-300 p-2" type="password"
-                    name="password"
-                    placeholder="Enter Password"
-                    required>
+                    <input
+                        class="border-1 rounded-md border-gray-300 p-2 {% if form.password.errors %}is-invalid{% endif %}"
+                        value="{{form.password.value|default_if_none:''}}" type="password" name="password"
+                        placeholder="Enter Password" required>
+
+                    <!-- Display password error -->
+                    {% if form.password.errors %}
+                    <div class="bg-red-100 border-t-4 border-red-500 rounded-b text-red-900 px-4 py-3 shadow-md">
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined">
+                                error
+                            </span>
+                            <div class="pl-2">
+                                {{form.password.errors}}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <button class="login-btn rounded-lg bg-blue-300 hover:bg-blue-400 text-center text-white p-3 mt-3"
                         type="submit">Sign in</button>
