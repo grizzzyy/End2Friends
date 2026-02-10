@@ -16,7 +16,24 @@
   ```sh
   cd End2Friends
   ```
-  3. Start the server 
+  3. Create and activate virtual environment (recommended)
+```sh
+   python -m venv .venv
+   source .venv/Scripts/activate
+```
+  4. Install dependencies 
+  ```sh
+  pip install -r requirements.txt
+  ```
+  5. Navigate to development branch
+  ```sh
+  git checkout development
+  ```
+  6. Run database migrations 
+  ```sh
+  python manage.py migrate 
+  ```
+  7. Start the server 
   ```sh
   python manage.py runserver
   ```
