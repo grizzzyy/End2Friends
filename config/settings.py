@@ -35,6 +35,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rooms',
+    'channels',# Add the Channels
+    'messages'# Add the messages(chat)
+    
+    
 ]
 
 MIDDLEWARE = [
