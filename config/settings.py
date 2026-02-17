@@ -26,7 +26,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'core',
+    'core', # landing page App/Welcome page
     'accounts.apps.AccountsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rooms',
     'channels',# Add the Channels
-    'messages'# Add the messages(chat)
+    'chat'# Add the (Chat App)
     
     
 ]
