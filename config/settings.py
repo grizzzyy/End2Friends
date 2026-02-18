@@ -36,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rooms',
     'channels',# Add the Channels
-    'chat'# Add the (Chat App)
+    'chat' # Add the (Chat App)
     
     
 ]
@@ -68,7 +68,17 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application'
+WSGI_APPLICATION = 'config.wsgi.application' # we won't be using this
+# ---------------------------------------------------------
+# CHANNELS ------------------------------------------------
+# ---------------------------------------------------------
+ASGI_APPLICATION = 'config.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        },
+    }
 
 
 # Database
