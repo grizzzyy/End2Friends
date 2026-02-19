@@ -26,6 +26,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'core', # landing page App/Welcome page
     'accounts.apps.AccountsConfig',
     'django.contrib.admin',

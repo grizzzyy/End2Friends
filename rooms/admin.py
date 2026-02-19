@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import StudyRoom, RoomMembership, RoomInvite
-
+# the classrooms
 
 @admin.register(StudyRoom)
 class StudyRoomAdmin(admin.ModelAdmin):

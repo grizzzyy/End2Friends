@@ -8,6 +8,5 @@ from .import views
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path('',include('user,urls')),
-    path('', include('chat.urls')),
+   # path('chat/<str:room_name>/', views.chat_room, name='chat'),
 ]
