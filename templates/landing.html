@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -44,7 +45,7 @@
 
             </div>
             <div class="relative max-w-md">
-                <img class="w-[200px] h-[200px] mt-40" src="decoration-landing.png" alt="Decorative">
+                <img class="w-[200px] h-[200px] mt-40" src="{% static 'images/decoration-landing.png' %}" alt="Decorative">
             </div>
             <div class="max-w-md p-[60px] items-center self-auto">
                 <p class="text-3xl font-bold text-center pb-8">Questions You May Have</p>
@@ -107,7 +108,7 @@
     .main-content {
         height: 90vh;
         background-color: #585aa1;
-        background-image: url(upscalemedia-transformed.png);
+        background-image: url("{% static 'images/landing-hero.png' %}");
         background-size: cover;
         position: relative
     }
