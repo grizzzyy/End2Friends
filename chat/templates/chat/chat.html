@@ -1,1 +1,47 @@
-# frontend will implement this
+# frontend will implement this fully
+# current page is for testing purposes right now
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+</head>
+<body>
+    <h2>Chat Room</h2>
+
+    <div>
+        <input id="messageInput" type="text" placeholder="Type a message..." />
+        <button id="sendBtn">Send</button>
+    </div>
+
+    <pre id="log"></pre>
+
+    <script>
+       
+        const socket = new WebSocket("ws://" + window.location.host + "/ws/chat/test/");
+
+        const log = (msg) => {
+            document.getElementById("log").textContent += msg + "\n";
+        };
+
+        socket.onopen = () => log("Connected");
+        socket.onclose = () => log("Disconnected");
+        socket.onerror = (err) => log("Error: " + err);
+
+        socket.onmessage = (event) => {
+            log("Received: " + event.data);
+        };
+
+        document.getElementById("sendBtn").onclick = () => {
+            const input = document.getElementById("messageInput");
+            const msg = input.value;
+
+            socket.send(JSON.stringify({ message: msg }));
+            log("Sent: " + msg);
+
+            input.value = "";
+        };
+    </script>
+</body>
+</html>
