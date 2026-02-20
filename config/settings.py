@@ -42,8 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rooms',
     'channels',# Add the Channels
-    'chat' # Add the (Chat App)
-    
+    'chat', # Add the (Chat App)
     
 ]
 

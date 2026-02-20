@@ -1,29 +1,219 @@
-{% extends "base.html" %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block content %}
-<div style="text-align: center; padding: 20px;">
-    <h1 style="font-size: 2.2rem; color: #6d28d9; margin-bottom: 10px;">
-        Welcome to End2Friend 
-    </h1>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>End2Friend</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
-    <p style="font-size: 1.2rem; color: #555; max-width: 500px; margin: 0 auto;">
-        Your cozy space to study together, stay organized, and keep your friends close.
-    </p>
+    <!-- Google font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Varela+Round&display=swap"
+        rel="stylesheet">
 
-    <div style="margin-top: 30px;">
-        <a href="{% url 'login' %}"
-           style="padding: 12px 24px; background: #a78bfa; color: white; text-decoration: none; border-radius: 10px; margin-right: 10px; font-size: 1rem;">
-           Login
-        </a>
+    <!-- Icon -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=drone_2" />
+</head>
 
-        <a href="{% url 'register' %}"
-           style="padding: 12px 24px; background: #c084fc; color: white; text-decoration: none; border-radius: 10px; font-size: 1rem;">
-           Create Account
-        </a>
+<body>
+    <div class="main-content ">
+        <nav class="flex justify-end">
+            <div class="flex flex-row p-4 gap-4 text-xl">
+                <a href="{% url 'register' %}" class="button-74">Sign Up</a>
+                <a href="{% url 'login' %}" class="button-74">Login</a>
+            </div>
+        </nav>
+
     </div>
 
-    <p style="margin-top: 25px; font-size: 0.9rem; color: #777;">
-        New here? Join us and start your study journey today ✨
-    </p>
-</div>
-{% endblock %}
+    <div class="wave-container"></div>
+
+    <div class="secondary-content">
+        <div class="flex justify-center pt-8">
+            <div class="max-w-md p-[60px]">
+                <h1 class="pb-6 text-center text-3xl font-bold">What is End2Friend?</h1>
+                <p class="text-xl">End2Friend is a collaborative study platform to chat with fellow students, join
+                    focused study rooms, and stay productive with built-in tools all while protecting information.</p>
+                <p class="pt-2 text-xl"> End2Friend aims to give students a secure platform that combines messaging,
+                    file sharing, and study‑focused features in one place</p>
+                <a href="{% url 'register' %}" class="flex pt-4 button-74 justify-center">Sign Up</a>
+
+            </div>
+            <div class="relative max-w-md">
+                <img class="w-[200px] h-[200px] mt-40" src="{% static 'images/decoration-landing.png' %}" alt="Decorative">
+            </div>
+            <div class="max-w-md p-[60px] items-center self-auto">
+                <p class="text-3xl font-bold text-center pb-8">Questions You May Have</p>
+                <details class="border-b border-violet-300 py-4">
+                    <summary class="text-xl font-semibold cursor-pointer">Is End2Friend free to use?</summary>
+                    <p class="pt-3 text-lg">Yes, End2Friend is completely free for all students.</p>
+                </details>
+
+                <details class="border-b border-violet-300 py-4">
+                    <summary class="text-xl font-semibold cursor-pointer">How do I create a study group?</summary>
+                    <p class="pt-3 text-lg">Simply sign up and click the create group button from your dashboard.</p>
+                </details>
+
+                <details class="border-b border-violet-300 py-4">
+                    <summary class="text-xl font-semibold cursor-pointer">Is file-sharing secure?</summary>
+                    <p class="pt-3 text-lg">Yes, End2Friend uses end-to-end encryption to protect all your information.
+                    </p>
+                </details>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="wave-container-2"></div>
+
+    <div class="tertiary-content">
+        <div class="flex justify-center pt-8">
+            <p class="p-[40px] text-3xl font-bold">What Do We Offer?</p>
+        </div>
+        <div class="grid grid-cols-4 gap-8 max-w-6xl mx-auto pb-8">
+            <div class="bg-violet-100 text-blue-900 rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-bold pb-2">Real Time Messaging</h3>
+                <p>Chat instantly with fellow students in study rooms and private messages.</p>
+            </div>
+
+            <div class="bg-violet-100 text-blue-900 rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-bold pb-2">Pomodoro Timer</h3>
+                <p>Stay focused and productive with a built-in Pomodoro timer to manage study sessions.</p>
+            </div>
+
+            <div class="bg-violet-100 text-blue-900 rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-bold pb-2">Channel Organization</h3>
+                <p>Organize your study groups into dedicated channels to keep topics clear and focused.</p>
+            </div>
+
+            <div class="bg-violet-100 text-blue-900 rounded-xl shadow-md p-6">
+                <h3 class="text-xl font-bold pb-2">Reminders Dashboard</h3>
+                <p>Keep track of deadlines and study goals with a personal reminders dashboard.</p>
+            </div>
+        </div>
+
+    </div>
+</body>
+
+<style>
+    * {
+        font-family: 'Varela Round', sans-serif;
+    }
+
+    .main-content {
+        height: 90vh;
+        background-color: #585aa1;
+        background-image: url("{% static 'images/landing-hero.png' %}");
+        background-size: cover;
+        position: relative
+    }
+
+    .secondary-content {
+        background-color: #f2f1e5;
+        color: #4d508e;
+    }
+
+    .tertiary-content {
+        background-color: #585aa1;
+        color: #f2f1e5;
+    }
+
+    .nav {
+        width: 80%;
+    }
+
+    /* css for wave grabbed from: https://wavier.art/ */
+    .wave-container {
+        height: 10vh;
+        background-color: #585aa1;
+        position: relative;
+    }
+
+    .wave-container::before {
+        content: "";
+        width: 100%;
+        height: 39px;
+        position: absolute;
+        bottom: -0.3%;
+        left: 0;
+        background-size: auto;
+        background-repeat: repeat no-repeat;
+        background-position: 60vw bottom;
+        background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1200  134' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M0 98L50 92C100 86 200 74 300 50C400 26 500 -10 600 2C700 14 800 74 900 98C1000 122 1100 110 1150 104L1200 98V134H1150C1100 134 1000 134 900 134C800 134 700 134 600 134C500 134 400 134 300 134C200 134 100 134 50 134H0V98Z' fill='%23f2f1e5'/></svg>");
+    }
+
+    @media(max-width:850px) {
+        .wave-container::before {
+            height: 19.5px
+        }
+    }
+
+    .wave-container-2 {
+        height: 10vh;
+        background-color: #f2f1e5;
+        position: relative;
+    }
+
+    .wave-container-2::before {
+        content: "";
+        width: 100%;
+        height: 36px;
+        position: absolute;
+        bottom: -0.3%;
+        left: 0;
+        background-size: auto;
+        background-repeat: repeat no-repeat;
+        background-position: 61vw bottom;
+        background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 1200  134' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M0 98L50 92C100 86 200 74 300 50C400 26 500 -10 600 2C700 14 800 74 900 98C1000 122 1100 110 1150 104L1200 98V134H1150C1100 134 1000 134 900 134C800 134 700 134 600 134C500 134 400 134 300 134C200 134 100 134 50 134H0V98Z' fill='%23585aa1'/></svg>");
+    }
+
+    @media(max-width:850px) {
+        .wave-container-2::before {
+            height: 18px
+        }
+    }
+
+    /* CSS from https://getcssscan.com/css-buttons-examples*/
+    .button-74 {
+        background-color: #585aa1;
+        border: 2px solid #050028;
+        border-radius: 30px;
+        box-shadow: #050028 4px 4px 0 0;
+        color: #efefef;
+        cursor: pointer;
+        display: inline-block;
+        font-weight: 600;
+        font-size: 18px;
+        padding: 0 18px;
+        line-height: 50px;
+        text-align: center;
+        text-decoration: none;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+    }
+
+    .button-74:hover {
+        background-color: #fff;
+        color: #050028;
+    }
+
+    .button-74:active {
+        box-shadow: #422800 2px 2px 0 0;
+        transform: translate(2px, 2px);
+    }
+
+    @media (min-width: 768px) {
+        .button-74 {
+            min-width: 120px;
+            padding: 0 25px;
+        }
+    }
+</style>
+
+</html>
