@@ -69,18 +69,22 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'config.wsgi.application' # we won't be using this
+#WSGI_APPLICATION = 'config.wsgi.application' # we won't be using this
 # ---------------------------------------------------------
 # CHANNELS ------------------------------------------------
 # ---------------------------------------------------------
+# Point Django at the ASGI app instead of WSGI
 ASGI_APPLICATION = 'config.asgi.application'
 
+# Implement Channel layer using Redis
 CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
         },
-    }
-
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
