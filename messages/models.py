@@ -16,7 +16,7 @@ class Message(models.Model):
     is_deleted = models.BooleanField(default=False)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
-    # Pinning / Flagging
+    # Pinning / Flaggingx
     is_pinned = models.BooleanField(default=False)
     is_flagged = models.BooleanField(default=False)
     flag_reason = models.CharField(max_length=255, blank=True)
