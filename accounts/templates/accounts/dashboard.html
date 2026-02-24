@@ -131,34 +131,43 @@
 
             </div>
 
-            <!-- Active Channels Card -->
-            <div class="bg-white rounded-xl shadow p-6 mt-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-lg font-bold text-gray-800">Active Channels</h2>
-                    <a href="#" class="text-sm text-purple-600 hover:text-purple-800">View all</a>
-                </div>
+<!-- Active Channels Card -->
+<div class="bg-white rounded-xl shadow p-6 mt-6">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-gray-800">Active Channels</h2>
+        <a href="#" class="text-sm text-purple-600 hover:text-purple-800">View all</a>
+    </div>
 
-                <ul class="space-y-3">
-                    {% for channel in channels %}
-                    <!-- Yvette Replaced this line below -->
-                   <a href="{% url 'chat_room' channel.name %}" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition"></a>
-                   <!-- The line above wires the channels in the dashboard to actual chat rooms -->
-                        <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
-                            <span class="material-symbols-outlined text-purple-600 text-sm">chat</span>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-gray-800 text-sm font-medium">#{{ channel.name }}</p>
-                            <p class="text-xs text-gray-400">Last active {{ channel.last_activity|timesince }} ago</p>
-                        </div>
-                        {% if channel.unread_count > 0 %}
-                        <span class="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full">{{ channel.unread_count }}</span>
-                        {% endif %}
-                    </li>
-                    {% empty %}
-                    <li class="text-center text-gray-400 text-sm py-4">No channels joined yet.</li>
-                    {% endfor %}
-                </ul>
-            </div>
+    <ul class="space-y-3">
+        {% for channel in channels %}
+        <li>
+            <a href="{% url 'chat_room' channel.name %}" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition">
+                <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-purple-600 text-sm">chat</span>
+                </div>
+                <div class="flex-1">
+                    <p class="text-gray-800 text-sm font-medium">#{{ channel.name }}</p>
+                    <p class="text-xs text-gray-400">Last active {{ channel.last_activity|timesince }} ago</p>
+                </div>
+                {% if channel.unread_count > 0 %}
+                <span class="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full">{{ channel.unread_count }}</span>
+                {% endif %}
+            </a>
+        </li>
+        {% empty %}
+        <li class="text-center text-gray-400 text-sm py-4">No channels joined yet.</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Create channel form — outside the loop -->
+    <form method="POST" class="flex gap-2 mt-4">
+        {% csrf_token %}
+        {{ channel_form.name }}
+        <button type="submit" name="create_channel" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
+            + New Channel
+        </button>
+    </form>
+</div>
 
             <!-- Pomodoro Status Card -->
             <div class="bg-white rounded-xl shadow p-6 mt-6 max-w-md mx-auto">
