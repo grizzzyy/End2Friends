@@ -21,3 +21,14 @@ class TaskForm(forms.ModelForm):
             "priority": forms.Select(attrs={"class": "px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"}),
             "channel": forms.TextInput(attrs={"placeholder": "#channel", "class": "px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"}),
         }
+
+class ChannelForms(forms.ModelForm):
+    class Meta:
+        model = Channel
+        fields = ['name']
+        widgets = {
+        'name': forms.TextInput(attrs={
+            'placeholder': 'channel-name',
+            'class': 'border-purple-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400'
+            })
+        }

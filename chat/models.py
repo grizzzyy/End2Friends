@@ -6,7 +6,7 @@ import os
 User = get_user_model()
 
 
-# Represents any chat space (DM, group chat, etc.)
+# represents any chat space (DM, group chat, etc.)
 class Conversation(models.Model):
     # a name for the conversation
     name = models.CharField(max_length=255, blank=True, null=True)
@@ -40,13 +40,13 @@ class Conversation(models.Model):
         blank=True
     )
 
-    # Auto-generate a room ID if one doesn't exist
+    # auto-generate a room ID if one doesn't exist
     def save(self, *args, **kwargs):
         if not self.room_id:
             self.room_id = shortuuid.uuid()
         super().save(*args, **kwargs)
 
-    # Show name if available, otherwise fallback to room ID    
+    # show name if available, otherwise fallback to room ID    
     def __str__(self):
         return self.name or f"DM({self.room_id})"
 
@@ -75,7 +75,7 @@ class Message(models.Model):
     class Meta:
         ordering = ["timestamp"]
 
-    # Show username and either text or "[file]"
+    # show username and either text or "[file]"
     def __str__(self):
         preview = self.content if self.content else "[file]"
         return f"{self.user.username}: {preview}"
