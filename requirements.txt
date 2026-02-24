@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 asgiref==3.11.1
 attrs==25.4.0
 autobahn==25.12.2
@@ -18,9 +17,6 @@ Incremental==24.11.0
 msgpack==1.1.2
 packaging==26.0
 pillow==12.1.0
-=======
-django
->>>>>>> feature/dashboard
 psycopg==3.3.2
 psycopg-binary==3.3.2
 psycopg2-binary==2.9.11
