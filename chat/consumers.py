@@ -1,9 +1,10 @@
-from channels.generic.websocket import asyncwebsocketconsumer
+from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 import json
+from .models import Conversation, Message
 
 
-class chatconsumer(asyncwebsocketconsumer):
+class chatconsumer(AsyncWebsocketConsumer):
 
     # runs when a user connects
     async def connect(self):
@@ -59,10 +60,11 @@ class chatconsumer(asyncwebsocketconsumer):
     # saves a message to the database
     @database_sync_to_async
     def save_message(self, user, room_id, content):
-        from .models import conversation, message
+        # get or create the conversation
+        convo, _ = Conversation.objects.get_or_create(room_id=room_id)
 
-        convo, _ = conversation.objects.get_or_create(room_id=room_id)
-        message.objects.create(
+        # create the message
+        Message.objects.create(
             conversation=convo,
             user=user,
             content=content
