@@ -8,11 +8,11 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 django.setup()
 
-from chat.routing import websocket_urlpatterns  # safe now
+import chat.routing
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
-        URLRouter(websocket_urlpatterns)
+        URLRouter(chat.routing.websockets_urlpatterns)
     ),
 })
