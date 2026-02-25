@@ -3,7 +3,7 @@ from django.db import models
 
 User = settings.AUTH_USER_MODEL
 
-class StudyChannel(models.Model):
+class StudyChannel(models.Model):  # renamed
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_channels")
@@ -21,7 +21,11 @@ class Membership(models.Model):
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    channel = models.ForeignKey(StudyChannel, on_delete=models.CASCADE, related_name="memberships")
+    channel = models.ForeignKey(
+        StudyChannel,  # <-- make sure this points to StudyChannel
+        on_delete=models.CASCADE,
+        related_name="memberships"
+    )
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="member")
     joined_at = models.DateTimeField(auto_now_add=True)
 
