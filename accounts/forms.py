@@ -21,8 +21,8 @@ class UpdateUserForm(forms.ModelForm):
 
 
 class UpdateProfileForm(forms.ModelForm):
-    avatar = forms.ImageField(widget=forms.FileInput())
-    bio = forms.CharField(widget=forms.Textarea())
+    avatar = forms.ImageField(widget=forms.FileInput(), required=False)
+    bio = forms.CharField(widget=forms.Textarea(), required=False)
 
     class Meta:
         model = UserProfile
