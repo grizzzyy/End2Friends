@@ -115,13 +115,19 @@ def dashboard_view(request):
 @login_required
 def profile_view(request):
     if request.method == 'POST':
-        user_form = UpdateUserForm(request.POST, instance=request.user)
-        profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
-
-        if user_form.is_valid() and profile_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            return redirect(to='profile')
+        if request.POST.get('form_type') == 'avatar':
+            profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+            user_form = UpdateUserForm(instance=request.user)
+            if profile_form.is_valid():
+                profile_form.save()
+                return redirect('profile')
+        else:
+            user_form = UpdateUserForm(request.POST, instance=request.user)
+            profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+            if user_form.is_valid() and profile_form.is_valid():
+                user_form.save()
+                profile_form.save()
+                return redirect('profile')
     else:
         user_form = UpdateUserForm(instance=request.user)
         profile_form = UpdateProfileForm(instance=request.user.userprofile)
