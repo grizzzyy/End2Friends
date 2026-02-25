@@ -2,19 +2,19 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 
-from .models import Channel, Membership
+from .models import StudyChannel, Membership
 
 
-class ChannelForm(forms.ModelForm):
+class StudyChannelForm(forms.ModelForm):
     class Meta:
-        model = Channel
+        model = StudyChannel
         fields = ["name", "description", "is_private"]
 
 
 @login_required
 def create_channel(request):
     if request.method == "POST":
-        form = ChannelForm(request.POST)
+        form = StudyChannelForm(request.POST)
         if form.is_valid():
             channel = form.save(commit=False)
             channel.creator = request.user
@@ -27,14 +27,14 @@ def create_channel(request):
             )
             return redirect("list_channels")
     else:
-        form = ChannelForm()
+        form = StudyChannelForm()
 
-    return render(request, "channels/create_channel.html", {"form": form})
+    return render(request, "groups/create_channel.html", {"form": form})
 
 
 @login_required
 def join_channel(request, channel_id):
-    channel = get_object_or_404(Channel, id=channel_id)
+    channel = get_object_or_404(StudyChannel, id=channel_id)
 
     Membership.objects.get_or_create(
         user=request.user,
@@ -47,7 +47,7 @@ def join_channel(request, channel_id):
 
 @login_required
 def leave_channel(request, channel_id):
-    channel = get_object_or_404(Channel, id=channel_id)
+    channel = get_object_or_404(StudyChannel, id=channel_id)
 
     Membership.objects.filter(
         user=request.user,
@@ -59,8 +59,8 @@ def leave_channel(request, channel_id):
 
 @login_required
 def list_channels(request):
-    channels = Channel.objects.filter(
+    channels = StudyChannel.objects.filter(
         memberships__user=request.user
     ).distinct()
 
-    return render(request, "channels/list_channels.html", {"channels": channels})
+    return render(request, "groups/list_channels.html", {"channels": channels})
