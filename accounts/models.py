@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from PIL import Image
 
 # Represents a user account, the thing that logs in
 class User(AbstractUser):
@@ -21,7 +22,15 @@ class UserProfile(models.Model):
     avatar = models.ImageField(upload_to="profiles/", blank=True, null=True)
     display_name = models.CharField(max_length=50, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.avatar:
+            img = Image.open(self.avatar.path)
 
+        if img.height > 100 or img.width > 100:
+            new_img = (100, 100)
+            img.thumbnail(new_img)
+            img.save(self.avatar.path)
     def __str__(self):
         return self.display_name or self.user.username
 
