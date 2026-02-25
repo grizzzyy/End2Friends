@@ -23,6 +23,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('', include('core.urls')), # for dashboard
     path("chat/", include("chat.urls")), # for the chat app
+    path("channels/", include("channels.urls")), #for channels.
 ]
 
 # Serve uploaded media files during development.
