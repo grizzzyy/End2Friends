@@ -1,6 +1,5 @@
 from django.apps import AppConfig
 
-
 class MessagesConfig(AppConfig):
-    name = "messages"
-    label = 'chat'
+    name = "chat"
+    label = "chat"

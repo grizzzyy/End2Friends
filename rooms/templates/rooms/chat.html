@@ -1,0 +1,27 @@
+<h1>{{ room.name }}</h1>
+
+<div id="messages" style="border:1px solid #ccc; height:300px; overflow-y:auto;"></div>
+
+<input id="messageInput" type="text" placeholder="Type a message...">
+<button id="sendBtn">Send</button>
+
+<script>
+    const roomId = "{{ room.id }}";
+    const socket = new WebSocket(
+        "ws://" + window.location.host + "/ws/chat/room/" + roomId + "/"
+    );
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const messagesDiv = document.getElementById("messages");
+        messagesDiv.innerHTML += "<p><strong>" + data.user + ":</strong> " + data.message + "</p>";
+    };
+
+    document.getElementById("sendBtn").onclick = function() {
+        const input = document.getElementById("messageInput");
+        socket.send(JSON.stringify({
+            "message": input.value
+        }));
+        input.value = "";
+    };
+</script>
