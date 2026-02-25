@@ -8,6 +8,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
 django.setup()
 
+# Only import chat routing if chat has WebSocket routes
 import chat.routing
 
 application = ProtocolTypeRouter({

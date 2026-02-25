@@ -21,14 +21,12 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
-    path('', include('core.urls')), # for dashboard
-    path("chat/", include("chat.urls")), # for the chat app
-    path("channels/", include("channels.urls")), #for channels.
+    path('', include('core.urls')),  # dashboard
+    path("chat/", include("chat.urls")),  # chat app
+    path("groups/", include("groups.urls")),  # renamed messaging → groups
 ]
 
-# Serve uploaded media files during development.
-# Django doesn't handle this automatically
-
+# Serve uploaded media files during development
 from django.conf import settings
 from django.conf.urls.static import static
 

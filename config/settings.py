@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rooms',
     "channels",     #  Django Channels (library)
-    "messaging",    #  Our model for channels
+    "groups",       #  Our model for channels
     'chat', # Add the (Chat App)
     
 ]
