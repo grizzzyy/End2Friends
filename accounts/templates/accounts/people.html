@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}People - End2Friend{% endblock %}
+
+{% block content %}
+
+<main class="flex-1 p-8">
+
+    <h1 class="text-xl font-bold text-gray-800 mb-6">People</h1>
+
+    <!-- Search -->
+    <form method="GET" class="flex gap-2 mb-6 max-w-lg">
+        <input 
+            type="text" 
+            name="q" 
+            value="{{ query }}" 
+            placeholder="Search by username..."
+            class="flex-1 border border-purple-200 rounded-lg px-3 py-2 text-sm 
+                   focus:outline-none focus:ring-2 focus:ring-purple-400"
+        />
+        <button 
+            type="submit"
+            class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700"
+        >
+            Search
+        </button>
+    </form>
+
+    <!-- User List -->
+    <div class="bg-white rounded-xl shadow divide-y divide-gray-100 max-w-lg">
+        {% for u in users %}
+        <div class="flex items-center gap-4 p-4">
+            
+            <!-- Avatar -->
+            <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center 
+                        font-bold text-purple-700">
+                {{ u.username|first|upper }}
+            </div>
+
+            <!-- Username + Bio -->
+            <div class="flex-1">
+                <p class="text-gray-800 font-medium text-sm">{{ u.username }}</p>
+                {% if u.userprofile.bio %}
+                <p class="text-xs text-gray-400">{{ u.userprofile.bio|truncatechars:50 }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Message Button -->
+            <a 
+                href="{% url 'start_dm' u.username %}"
+                class="flex items-center gap-1 px-3 py-2 bg-purple-600 text-white rounded-lg 
+                       text-xs hover:bg-purple-700 transition"
+            >
+                <span class="material-symbols-outlined text-sm">chat</span>
+                Message
+            </a>
+
+        </div>
+        {% empty %}
+        <div class="p-6 text-center text-gray-400 text-sm">
+            {% if query %}
+                No users found for "{{ query }}"
+            {% else %}
+                No other users yet.
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+</main>
+
+{% endblock %}

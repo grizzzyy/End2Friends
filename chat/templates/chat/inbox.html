@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Messages - End2Friend{% endblock %}
+
+{% block content %}
+
+<main class="flex-1 p-8 max-w-2xl">
+
+    <h1 class="text-xl font-bold text-gray-800 mb-6">Messages</h1>
+
+    <!-- DM List (with delete button, no message previews) -->
+    <div class="bg-white rounded-xl shadow divide-y divide-gray-100">
+        {% for convo in conversations %}
+        <div class="flex items-center gap-3 p-4 hover:bg-purple-50 transition">
+
+            <!-- Clickable DM -->
+            <a href="{% url 'chat_room' convo.room_id %}" class="flex items-center gap-3 flex-1">
+
+                <!-- Avatar -->
+                <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center font-bold text-purple-700">
+                    {% for participant in convo.participants.all %}
+                        {% if participant != request.user %}
+                            {{ participant.username|first|upper }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Username -->
+                <div class="flex-1">
+                    <p class="text-gray-800 font-medium text-sm">
+                        {% for participant in convo.participants.all %}
+                            {% if participant != request.user %}
+                                {{ participant.username }}
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+                </div>
+
+            </a>
+
+            <!-- Delete button -->
+            <a href="{% url 'delete_conversation' convo.room_id %}"
+               class="text-red-500 text-xs hover:underline"
+               onclick="return confirm('Delete this conversation?');">
+                Delete
+            </a>
+
+        </div>
+        {% empty %}
+        <div class="p-6 text-center text-gray-400 text-sm">
+            No conversations yet. Go to People and start one!
+        </div>
+        {% endfor %}
+    </div>
+
+</main>
+
+{% endblock %}
