@@ -1,76 +1,102 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>End2Friend</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}End2Friend{% endblock %}</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Varela+Round&display=swap" rel="stylesheet">
+
+    <!-- Google Icons -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f7f4ff;
-            margin: 0;
-            padding: 0;
-            color: #333;
+        .varela-round-regular {
+            font-family: "Varela Round", sans-serif;
         }
 
-        header {
-            background: #a78bfa;
-            padding: 15px 20px;
-            color: white;
-            text-align: center;
-            font-size: 1.4rem;
-            font-weight: bold;
-        }
-
-        nav {
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        nav a {
-            display: inline-block;
-            margin: 0 10px;
-            padding: 10px 18px;
-            background: #c4b5fd;
-            color: white;
-            text-decoration: none;
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
             border-radius: 8px;
-            transition: 0.2s;
+            color: #6b7280;
+            text-decoration: none;
+            margin-bottom: 4px;
         }
 
-        nav a:hover {
-            background: #a78bfa;
+        .nav-link:hover {
+            background: #f3e8ff;
+            color: #7c3aed;
         }
 
-        .container {
-            max-width: 700px;
-            margin: 40px auto;
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        .nav-link.active {
+            background: #ede9fe;
+            color: #7c3aed;
         }
     </style>
+    {% block styles %}
+    {% endblock %}
 </head>
 
-<body>
+<body class="varela-round-regular">
+    <div class="flex min-h-screen bg-purple-50">
+        <!-- Sidebar -->
+        <aside class="w-56 bg-white shadow-md flex flex-col">
+            <!-- Logo -->
+            <div class="p-5 flex items-center gap-2 text-purple-600 border-b border-purple-100">
+                <span class="material-symbols-outlined">drone_2</span>
+                <h1 class="font-bold text-lg">End2Friend</h1>
+            </div>
 
-<header>
-    End2Friend
-</header>
+            <!-- User -->
+            <div class="p-5 flex items-center gap-3 border-b border-purple-100">
+                <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-purple-600">person</span>
+                </div>
+                <span class="text-gray-700 text-sm">{{ user.username }}</span>
+            </div>
 
-<!-- <nav>
-    {% if user.is_authenticated %}
-        <span>Welcome, {{ user.username }}!</span>
-        <a href="{% url 'logout' %}">Logout</a>
-        <a href="{% url 'dashboard' %}">Dashboard</a>
-    {% else %}
-        <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'register' %}">Register</a>
-    {% endif %}
-</nav> -->
+            <!-- Nav Links -->
+            <nav class="flex-1 p-4">
+                <a href="{% url 'dashboard' %}" class="nav-link {% if '/dashboard/' in request.path %}active{% endif %}">
+                    <span class="material-symbols-outlined">dashboard</span>
+                    Dashboard
+                </a>
+                <a href="{% url 'profile' %}" class="nav-link {% if '/profile/' in request.path %}active{% endif %}">
+                    <span class="material-symbols-outlined">person</span>
+                    Profile
+                </a>
+                <a href="#" class="nav-link">
+                    <span class="material-symbols-outlined">chat</span>
+                    Messages
+                </a>
+                <a href="#" class="nav-link">
+                    <span class="material-symbols-outlined">settings</span>
+                    Settings
+                </a>
+            </nav>
 
-<div class="container">
-    {% block content %}{% endblock %}
-</div>
+            <!-- Logout -->
+            <div class="p-4 border-t border-purple-100">
+                <a href="{% url 'logout' %}" class="nav-link text-red-400 hover:bg-red-50">
+                    <span class="material-symbols-outlined">logout</span>
+                    Log out
+                </a>
+            </div>
+        </aside>
 
+        {% block content %}
+        {% endblock %}
+
+    </div>
 </body>
+
 </html>
