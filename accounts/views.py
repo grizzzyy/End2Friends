@@ -1,7 +1,24 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import CustomUserCreationForm, CustomAuthenticationForm
+from django.utils import timezone
+
+from .forms import (
+    CustomUserCreationForm,
+    CustomAuthenticationForm,
+    TaskForm,
+    ChannelForm,
+)
+
+from .models import (
+    Task,
+    Channel,
+    PomodoroSession,
+    Reminder,
+    Activity,
+    StudyRoom,
+)
+
 
 def register_view(request):
     if request.method == "POST":
@@ -33,6 +50,63 @@ def logout_view(request):
     logout(request)
     return redirect("login")
 
+
 @login_required
 def dashboard_view(request):
-    return render(request, "accounts/dashboard.html")
+    # Handle POST actions
+    if request.method == "POST":
+
+        # Add Task
+        if "add_task" in request.POST:
+            form = TaskForm(request.POST)
+            channel_form = ChannelForm()  # keep other form available
+            if form.is_valid():
+                task = form.save(commit=False)
+                task.user = request.user
+                task.save()
+                return redirect("dashboard")
+
+        # Create Channel
+        elif "create_channel" in request.POST:
+            channel_form = ChannelForm(request.POST)
+            form = TaskForm()  # keep other form available
+            if channel_form.is_valid():
+                channel = channel_form.save()
+                channel.members.add(request.user)
+                return redirect("dashboard")
+
+    else:
+        form = TaskForm()
+        channel_form = ChannelForm()
+
+    # Dashboard data
+    tasks = Task.objects.filter(user=request.user, completed=False)[:5]
+    channels = request.user.channels.all()[:5]
+    pomodoro, _ = PomodoroSession.objects.get_or_create(user=request.user)
+    reminders = Reminder.objects.filter(
+        user=request.user,
+        remind_at__gte=timezone.now()
+    )[:5]
+    activities = Activity.objects.filter(user=request.user)[:4]
+
+    # Ensure correct related_name for StudyRoom
+    study_rooms = (
+        request.user.study_rooms.all()[:4]
+        if hasattr(request.user, "study_rooms")
+        else StudyRoom.objects.filter(members=request.user)[:4]
+    )
+
+    return render(
+        request,
+        "accounts/dashboard.html",
+        {
+            "tasks": tasks,
+            "form": form,
+            "channel_form": channel_form,
+            "channels": channels,
+            "pomodoro": pomodoro,
+            "reminders": reminders,
+            "activities": activities,
+            "study_rooms": study_rooms,
+        },
+    )
