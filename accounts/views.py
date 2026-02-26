@@ -2,6 +2,11 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+
+
+User = get_user_model()
 
 from .forms import (
     CustomUserCreationForm,
@@ -110,3 +115,13 @@ def dashboard_view(request):
             "study_rooms": study_rooms,
         },
     )
+
+@login_required
+def people_view(request):
+    query = request.GET.get('q', '')
+    users = User.objects.exclude(id=request.user.id)
+    if query:
+        users = users.filter(username__icontains=query)
+    return render(request, "accounts/people.html", {"users": users, "query": query})
+    
+    

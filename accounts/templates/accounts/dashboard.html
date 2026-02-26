@@ -20,6 +20,7 @@
 
         <!-- Sidebar -->
         <aside class="w-56 bg-white shadow-md flex flex-col">
+
             <!-- Logo -->
             <div class="p-5 flex items-center gap-2 text-purple-600 border-b border-purple-100">
                 <span class="material-symbols-outlined">drone_2</span>
@@ -36,15 +37,15 @@
 
             <!-- Nav Links -->
             <nav class="flex-1 p-4">
-                <a href="#" class="nav-link active">
+                <a href="{% url 'dashboard' %}" class="nav-link active">
                     <span class="material-symbols-outlined">dashboard</span>
                     Dashboard
                 </a>
-                <a href="#" class="nav-link">
+                <a href="{% url 'people' %}" class="nav-link">
                     <span class="material-symbols-outlined">person</span>
-                    Profile
+                    People
                 </a>
-                <a href="#" class="nav-link">
+                <a href="{% url 'inbox' %}" class="nav-link">
                     <span class="material-symbols-outlined">chat</span>
                     Messages
                 </a>
@@ -61,11 +62,12 @@
                     Log out
                 </a>
             </div>
+
         </aside>
 
         <!-- Main Content -->
         <main class="flex-1 p-8">
-            
+
             <!-- Greeting Header -->
             <header class="mb-8">
                 <p class="text-sm text-purple-500 mb-1">{% now "l, F j, Y" %}</p>
@@ -75,16 +77,20 @@
 
             <!-- Tasks & Reminders Row -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
+
                 <!-- Today's Tasks Card -->
                 <div class="bg-white rounded-xl shadow p-6">
                     <h2 class="text-lg font-bold text-gray-800 mb-4">Today's Tasks</h2>
-                    
+
                     <ul class="space-y-3">
                         {% for task in tasks %}
                         <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                             <input type="checkbox" class="w-4 h-4 accent-purple-600" {% if task.completed %}checked{% endif %}>
-                            <span class="w-2 h-2 rounded-full {% if task.priority == 'high' %}bg-red-500{% elif task.priority == 'medium' %}bg-yellow-500{% else %}bg-green-500{% endif %}"></span>
+                            <span class="w-2 h-2 rounded-full
+                                {% if task.priority == 'high' %}bg-red-500
+                                {% elif task.priority == 'medium' %}bg-yellow-500
+                                {% else %}bg-green-500{% endif %}">
+                            </span>
                             <div class="flex-1">
                                 <p class="text-gray-800 text-sm">{{ task.title }}</p>
                                 <p class="text-xs text-gray-400">{{ task.channel }} · Due {{ task.due_date|date:"M j" }}</p>
@@ -101,7 +107,10 @@
                         {{ form.due_date }}
                         {{ form.priority }}
                         {{ form.channel }}
-                        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">+ Add Task</button>
+                        <button type="submit" name="add_task"
+                            class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
+                            + Add Task
+                        </button>
                     </form>
                 </div>
 
@@ -111,7 +120,7 @@
                         <h2 class="text-lg font-bold text-gray-800">Upcoming Reminders</h2>
                         <a href="#" class="text-sm text-purple-600 hover:text-purple-800">View all</a>
                     </div>
-                    
+
                     <ul class="space-y-3">
                         {% for reminder in reminders %}
                         <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -131,56 +140,60 @@
 
             </div>
 
-<!-- Active Channels Card -->
-<div class="bg-white rounded-xl shadow p-6 mt-6">
-    <div class="flex items-center justify-between mb-4">
-        <h2 class="text-lg font-bold text-gray-800">Active Channels</h2>
-        <a href="#" class="text-sm text-purple-600 hover:text-purple-800">View all</a>
-    </div>
-
-    <ul class="space-y-3">
-        {% for channel in channels %}
-        <li>
-            <a href="{% url 'chat_room' channel.name %}" class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition">
-                <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
-                    <span class="material-symbols-outlined text-purple-600 text-sm">chat</span>
+            <!-- Active Channels Card -->
+            <div class="bg-white rounded-xl shadow p-6 mt-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-bold text-gray-800">Active Channels</h2>
+                    <a href="#" class="text-sm text-purple-600 hover:text-purple-800">View all</a>
                 </div>
-                <div class="flex-1">
-                    <p class="text-gray-800 text-sm font-medium">#{{ channel.name }}</p>
-                    <p class="text-xs text-gray-400">Last active {{ channel.last_activity|timesince }} ago</p>
-                </div>
-                {% if channel.unread_count > 0 %}
-                <span class="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full">{{ channel.unread_count }}</span>
-                {% endif %}
-            </a>
-        </li>
-        {% empty %}
-        <li class="text-center text-gray-400 text-sm py-4">No channels joined yet.</li>
-        {% endfor %}
-    </ul>
 
-    <!-- Create channel form — outside the loop -->
-    <form method="POST" class="flex gap-2 mt-4">
-        {% csrf_token %}
-        {{ channel_form.name }}
-        <button type="submit" name="create_channel" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
-            + New Channel
-        </button>
-    </form>
-</div>
+                <ul class="space-y-3">
+                    {% for channel in channels %}
+                    <li>
+                        <a href="{% url 'chat_room' channel.name %}"
+                            class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition">
+                            <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
+                                <span class="material-symbols-outlined text-purple-600 text-sm">chat</span>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-gray-800 text-sm font-medium">#{{ channel.name }}</p>
+                                <p class="text-xs text-gray-400">Last active {{ channel.last_activity|timesince }} ago</p>
+                            </div>
+                            {% if channel.unread_count > 0 %}
+                            <span class="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full">
+                                {{ channel.unread_count }}
+                            </span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    {% empty %}
+                    <li class="text-center text-gray-400 text-sm py-4">No channels joined yet.</li>
+                    {% endfor %}
+                </ul>
+
+                <!-- Create Channel Form -->
+                <form method="POST" class="flex gap-2 mt-4">
+                    {% csrf_token %}
+                    {{ channel_form.name }}
+                    <button type="submit" name="create_channel"
+                        class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
+                        + New Channel
+                    </button>
+                </form>
+            </div>
 
             <!-- Pomodoro Status Card -->
             <div class="bg-white rounded-xl shadow p-6 mt-6 max-w-md mx-auto">
                 <h2 class="text-lg font-bold text-gray-800 mb-4 text-center">Pomodoro Timer</h2>
 
                 <div class="flex flex-col items-center gap-4">
+
                     <!-- Circular Indicator -->
                     <div class="relative w-28 h-28">
                         <svg class="w-28 h-28 transform -rotate-90">
                             <circle cx="56" cy="56" r="50" stroke="#e9d5ff" stroke-width="8" fill="none"></circle>
-                            <circle id="pomo-progress" cx="56" cy="56" r="50" stroke="#a855f7" stroke-width="8" fill="none"
-                                stroke-dasharray="314"
-                                stroke-dashoffset="314"
+                            <circle id="pomo-progress" cx="56" cy="56" r="50" stroke="#a855f7" stroke-width="8"
+                                fill="none" stroke-dasharray="314" stroke-dashoffset="314"
                                 stroke-linecap="round"></circle>
                         </svg>
                         <div class="absolute inset-0 flex items-center justify-center">
@@ -196,13 +209,16 @@
 
                     <!-- Buttons -->
                     <div class="flex gap-2">
-                        <button id="pomo-btn" onclick="togglePomodoro()" class="px-5 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition">
+                        <button id="pomo-btn" onclick="togglePomodoro()"
+                            class="px-5 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition">
                             Start
                         </button>
-                        <button id="pomo-reset" onclick="resetPomodoro()" class="px-5 py-2 bg-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-300 transition">
+                        <button id="pomo-reset" onclick="resetPomodoro()"
+                            class="px-5 py-2 bg-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-300 transition">
                             Reset
                         </button>
                     </div>
+
                 </div>
             </div>
 
@@ -212,7 +228,7 @@
                 <!-- Recent Activity Card -->
                 <div class="bg-white rounded-xl shadow p-6">
                     <h2 class="text-lg font-bold text-gray-800 mb-4">Recent Activity</h2>
-                    
+
                     <ul class="space-y-3">
                         {% for activity in activities %}
                         <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -242,10 +258,10 @@
                     </ul>
                 </div>
 
-                <!-- Study Room Status Card -->
+                <!-- Study Rooms Card -->
                 <div class="bg-white rounded-xl shadow p-6">
                     <h2 class="text-lg font-bold text-gray-800 mb-4">Study Rooms</h2>
-                    
+
                     <ul class="space-y-3">
                         {% for room in study_rooms %}
                         <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -262,7 +278,9 @@
                                     {% endif %}
                                 </p>
                             </div>
-                            <button class="px-3 py-1 bg-purple-600 text-white rounded-lg text-xs hover:bg-purple-700 transition">Join</button>
+                            <button class="px-3 py-1 bg-purple-600 text-white rounded-lg text-xs hover:bg-purple-700 transition">
+                                Join
+                            </button>
                         </li>
                         {% empty %}
                         <li class="text-center text-gray-400 text-sm py-4">No study rooms joined.</li>
@@ -272,126 +290,123 @@
 
             </div>
 
-            <script>
-                const WORK_DURATION = 25 * 60;
-                const BREAK_DURATION = 5 * 60;
-                
-                let timeLeft = WORK_DURATION;
-                let isRunning = false;
-                let isBreak = false;
-                let timerInterval = null;
-
-                const progressCircle = document.getElementById('pomo-progress');
-                const timeDisplay = document.getElementById('pomo-time');
-                const statusText = document.getElementById('pomo-status');
-                const toggleBtn = document.getElementById('pomo-btn');
-                const circumference = 314;
-
-                function updateDisplay() {
-                    const minutes = Math.floor(timeLeft / 60);
-                    const seconds = timeLeft % 60;
-                    timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                    
-                    const totalDuration = isBreak ? BREAK_DURATION : WORK_DURATION;
-                    const progress = timeLeft / totalDuration;
-                    progressCircle.style.strokeDashoffset = circumference * progress;
-                    
-                    if (isBreak) {
-                        progressCircle.style.stroke = '#f5b4e0ff';
-                    } else {
-                        progressCircle.style.stroke = '#a855f7';
-                    }
-                }
-
-                function updateStatus() {
-                    if (!isRunning && timeLeft === (isBreak ? BREAK_DURATION : WORK_DURATION)) {
-                        statusText.textContent = isBreak ? 'Break ready' : 'Not started';
-                        toggleBtn.textContent = 'Start';
-                    } else if (isRunning) {
-                        const minutes = Math.floor(timeLeft / 60);
-                        statusText.textContent = isBreak ? 'Break in progress' : `${minutes} minutes remaining`;
-                        toggleBtn.textContent = 'Pause';
-                    } else {
-                        const minutes = Math.floor(timeLeft / 60);
-                        statusText.textContent = `Paused - ${minutes}m left`;
-                        toggleBtn.textContent = 'Resume';
-                    }
-                }
-
-                function togglePomodoro() {
-                    if (isRunning) {
-                        clearInterval(timerInterval);
-                        isRunning = false;
-                    } else {
-                        isRunning = true;
-                        timerInterval = setInterval(() => {
-                            timeLeft--;
-                            updateDisplay();
-                            updateStatus();
-                            
-                            if (timeLeft <= 0) {
-                                clearInterval(timerInterval);
-                                isRunning = false;
-                                
-                                if (isBreak) {
-                                    isBreak = false;
-                                    timeLeft = WORK_DURATION;
-                                    statusText.textContent = 'Break complete! Ready to focus.';
-                                } else {
-                                    isBreak = true;
-                                    timeLeft = BREAK_DURATION;
-                                    statusText.textContent = 'Great work! Take a break.';
-                                }
-                                toggleBtn.textContent = 'Start';
-                                updateDisplay();
-                            }
-                        }, 1000);
-                    }
-                    updateStatus();
-                }
-
-                function resetPomodoro() {
-                    clearInterval(timerInterval);
-                    isRunning = false;
-                    isBreak = false;
-                    timeLeft = WORK_DURATION;
-                    updateDisplay();
-                    updateStatus();
-                }
-
-                updateDisplay();
-                updateStatus();
-            </script>
         </main>
 
     </div>
+
+    <script>
+        const WORK_DURATION = 25 * 60;
+        const BREAK_DURATION = 5 * 60;
+
+        let timeLeft = WORK_DURATION;
+        let isRunning = false;
+        let isBreak = false;
+        let timerInterval = null;
+
+        const progressCircle = document.getElementById('pomo-progress');
+        const timeDisplay = document.getElementById('pomo-time');
+        const statusText = document.getElementById('pomo-status');
+        const toggleBtn = document.getElementById('pomo-btn');
+        const circumference = 314;
+
+        function updateDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            const totalDuration = isBreak ? BREAK_DURATION : WORK_DURATION;
+            const progress = timeLeft / totalDuration;
+            progressCircle.style.strokeDashoffset = circumference * progress;
+            progressCircle.style.stroke = isBreak ? '#f5b4e0ff' : '#a855f7';
+        }
+
+        function updateStatus() {
+            if (!isRunning && timeLeft === (isBreak ? BREAK_DURATION : WORK_DURATION)) {
+                statusText.textContent = isBreak ? 'Break ready' : 'Not started';
+                toggleBtn.textContent = 'Start';
+            } else if (isRunning) {
+                const minutes = Math.floor(timeLeft / 60);
+                statusText.textContent = isBreak ? 'Break in progress' : `${minutes} minutes remaining`;
+                toggleBtn.textContent = 'Pause';
+            } else {
+                const minutes = Math.floor(timeLeft / 60);
+                statusText.textContent = `Paused - ${minutes}m left`;
+                toggleBtn.textContent = 'Resume';
+            }
+        }
+
+        function togglePomodoro() {
+            if (isRunning) {
+                clearInterval(timerInterval);
+                isRunning = false;
+            } else {
+                isRunning = true;
+                timerInterval = setInterval(() => {
+                    timeLeft--;
+                    updateDisplay();
+                    updateStatus();
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        isRunning = false;
+
+                        if (isBreak) {
+                            isBreak = false;
+                            timeLeft = WORK_DURATION;
+                            statusText.textContent = 'Break complete! Ready to focus.';
+                        } else {
+                            isBreak = true;
+                            timeLeft = BREAK_DURATION;
+                            statusText.textContent = 'Great work! Take a break.';
+                        }
+
+                        toggleBtn.textContent = 'Start';
+                        updateDisplay();
+                    }
+                }, 1000);
+            }
+            updateStatus();
+        }
+
+        function resetPomodoro() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            isBreak = false;
+            timeLeft = WORK_DURATION;
+            updateDisplay();
+            updateStatus();
+        }
+
+        updateDisplay();
+        updateStatus();
+    </script>
+
+    <style>
+        .varela-round-regular {
+            font-family: "Varela Round", sans-serif;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            color: #6b7280;
+            text-decoration: none;
+            margin-bottom: 4px;
+        }
+
+        .nav-link:hover {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+
+        .nav-link.active {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+    </style>
+
 </body>
-
-<style>
-    .varela-round-regular {
-        font-family: "Varela Round", sans-serif;
-    }
-
-    .nav-link {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        border-radius: 8px;
-        color: #6b7280;
-        text-decoration: none;
-        margin-bottom: 4px;
-    }
-
-    .nav-link:hover {
-        background: #f3e8ff;
-        color: #7c3aed;
-    }
-
-    .nav-link.active {
-        background: #ede9fe;
-        color: #7c3aed;
-    }
-</style>
-
 </html>
