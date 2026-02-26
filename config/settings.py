@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'rooms',
     'channels',# Add the Channels
     'chat', # Add the (Chat App)
-    
+
 ]
 
 MIDDLEWARE = [

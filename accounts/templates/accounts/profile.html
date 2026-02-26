@@ -1,0 +1,292 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>End2Friend - Register</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- Google font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Varela+Round&display=swap"
+        rel="stylesheet">
+
+    <!-- Icon -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=drone_2,edit,photo_camera" />
+</head>
+
+<body class="varela-round-regular">
+    <div class="flex min-h-screen">
+
+        <!-- this will be removed once grizzy adds navbar inheritance -->
+        <section class="base-background min-h-screen flex items-center justify-center w-56">
+            <div class="flex flex-col items-center gap-4">
+                <div class="flex login-title">
+                    <div class="flex min-h-screen bg-purple-50">
+                        <!-- Sidebar -->
+                        <aside class="w-56 bg-white shadow-md flex flex-col">
+                            <!-- Logo -->
+                            <div class="p-5 flex items-center gap-2 text-purple-600 border-b border-purple-100">
+                                <span class="material-symbols-outlined">drone_2</span>
+                                <h1 class="pl-2">End2Friend</h1>
+                            </div>
+
+                            <div class="flex flex-col rounded-2xl shadow-lg max-w-3xl p-10 bg-white text-center">
+                                <h1 class="font-bold text-gray-900 text-2xl mb-4">Welcome, !</h1>
+                                <p class="text-gray-600 mb-6">You are successfully logged in.</p>
+
+                                <!-- User -->
+                                <div class="p-5 flex items-center gap-3 border-b border-purple-100">
+                                    <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-purple-600">person</span>
+                                    </div>
+                                    <span class="text-gray-700 text-sm">username</span>
+                                </div>
+
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- above will be removed once grizzy adds navbar inheritance -->
+
+
+        <!-- main profile content -->
+        <main class="flex-1 p-8">
+            <header class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-800">Profile Settings</h1>
+            </header>
+            <div class="flex flex-col gap-6">
+                <div class="bg-white rounded-xl shadow p-6">
+                    <h2 class="text-lg font-bold text-gray-800 mb-4">My Profile</h2>
+                    <div class="space-y-3 px-4">
+                        <!-- Profile Overview -->
+                        <div class="bg-white shadow-sm border border-gray-300 rounded-xl p-4">
+                            <div class="flex gap-6 items-center">
+                                <div class="relative">
+                                    <!-- Change Avatar Image -->
+                                    {% if user.userprofile.avatar %}
+                                    <img class="rounded-full w-24 h-24 object-cover"
+                                        src="{{ user.userprofile.avatar.url }}" alt="Avatar">
+                                    {% else %}
+                                    <img class="rounded-full w-24 h-24 object-cover"
+                                        src="{% static 'images/profile_images/default_avatar.png' %}"
+                                        alt="Default Avatar">
+                                    {% endif %}
+                                    <div onclick="openAvatarModal()"
+                                        class="absolute bottom-0 right-0 bg-white rounded-full p-1 px-1 shadow-sm border border-gray-300 cursor-pointer flex items-center justify-center">
+                                        <span class="material-symbols-outlined"
+                                            style="font-size: 16px;">photo_camera</span>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <h1 class="text-xl font-bold">{{ user.username }}</h1>
+                                    <p class="text-sm">{{ user.userprofile.bio|default:"No bio yet." }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Profile Card -->
+                        <div class="bg-white shadow-sm border border-gray-300 rounded-xl p-4">
+                            <div class="flex flex row justify-between">
+                                <h1 class="text-lg font-bold text-gray-800">Personal Information</h1>
+                                <button onclick="openEditModal()"
+                                    class="pr-4 text-base bg-white shadow-sm border border-gray-300 rounded-full px-4 py-1 hover:bg-violet-100 transition-colors cursor-pointer">
+                                    Edit
+                                    <span class="material-symbols-outlined" style="font-size: 17px;">edit</span>
+                                </button>
+                            </div>
+                            <div class="space-y-3 px-4 pt-4">
+                                <div class="grid grid-cols-3">
+                                    <h1 class="text-gray-600 font-semibold text-lg">Username</h1>
+                                    <h1 class="text-gray-600 font-semibold text-lg">Email Address</h1>
+                                    <h1 class="text-gray-600 font-semibold text-lg">Bio</h1>
+                                </div>
+                                <div class="grid grid-cols-3">
+                                    <h1 class="text-black text-base">{{ user.username }}</h1>
+                                    <h1 class="text-black text-base">{{ user.email }}</h1>
+                                    <h1 class="text-black text-base">{{ user.userprofile.bio|default:"No bio yet." }}
+                                    </h1>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            <!-- Edit Profile Modal -->
+            <div id="edit-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                <div class="bg-white rounded-xl p-6 w-full max-w-2xl">
+
+                    <!-- Modal header -->
+                    <div class="flex items-center justify-between border-b border-gray-200 pb-4">
+                        <h3 class="text-lg font-medium text-gray-800">Edit Profile</h3>
+                        <button onclick="closeEditModal()"
+                            class="text-gray-500 hover:bg-violet-100 rounded-lg w-9 h-9 inline-flex justify-center items-center">
+                            <!-- Close icon from: https://heroicons.com/ -->
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Modal body-->
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="hidden" name="form_type" value="edit_profile">
+                        <div class="space-y-4 py-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-sm font-medium text-gray-700">Username</label>
+                                {{ user_form.username.as_widget }}
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-sm font-medium text-gray-700">Email</label>
+                                {{ user_form.email }}
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-sm font-medium text-gray-700">Bio</label>
+                                {{ profile_form.bio }}
+                            </div>
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="flex gap-4 border-t border-gray-200 pt-4">
+                            <button type="submit"
+                                class="bg-white shadow-sm border border-gray-300 rounded-full px-4 py-2 hover:bg-violet-100 transition-colors text-sm font-medium">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Change Avatar Modal -->
+            <div id="avatar-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                <div class="bg-white rounded-xl p-6 w-full max-w-md">
+
+                    <!-- Modal header -->
+                    <div class="flex items-center justify-between border-b border-gray-200 pb-4">
+                        <h3 class="text-lg font-medium text-gray-800">Change Profile Picture</h3>
+                        <button onclick="closeAvatarModal()"
+                            class="text-gray-500 hover:bg-violet-100 rounded-lg w-9 h-9 inline-flex justify-center items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                                stroke="currentColor" class="size-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Modal body -->
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                         <input type="hidden" name="form_type" value="avatar">
+                        <div class="py-4 flex flex-col gap-4">
+                            <!-- preview of current avatar -->
+                            <div class="flex justify-center">
+                                {% if user.userprofile.avatar %}
+                                <img class="rounded-full w-24 h-24 object-cover" src="{{ user.userprofile.avatar.url }}"
+                                    alt="Avatar">
+                                {% else %}
+                                <img class="rounded-full w-24 h-24 object-cover"
+                                    src="{% static 'images/profile_images/default_avatar.png' %}" alt="Default Avatar">
+                                {% endif %}
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <div class="flex items-center gap-3">
+                                    <label for="{{ profile_form.avatar.id_for_label }}"
+                                        class="border border-gray-300 rounded-full px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 transition-colors">
+                                        Choose File
+                                    </label>
+                                    <span id="file-name" class="text-sm text-gray-500">No file chosen</span>
+                                    {{ profile_form.avatar }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="flex gap-4 border-t border-gray-200 pt-4">
+                            <button type="submit"
+                                class="bg-white shadow-sm border border-gray-300 rounded-full px-4 py-2 hover:bg-violet-100 transition-colors text-sm font-medium">
+                                Save
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+
+<!-- Javascript for Modal Windows -->
+<script>
+    function openEditModal() {
+        document.getElementById('edit-modal').classList.remove('hidden')
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').classList.add('hidden')
+    }
+
+    function openAvatarModal() {
+        document.getElementById('avatar-modal').classList.remove('hidden')
+    }
+
+    function closeAvatarModal() {
+        document.getElementById('avatar-modal').classList.add('hidden')
+    }
+
+    // Hide default input for choosing file 
+    document.querySelector('input[type="file"]').classList.add('hidden')
+
+    document.querySelector('input[type="file"]').addEventListener('change', function () {
+        const fileName = this.files[0] ? this.files[0].name : 'No file chosen'
+        document.getElementById('file-name').textContent = fileName
+    })
+
+</script>
+
+<style>
+    .varela-round-regular {
+        font-family: "Varela Round", sans-serif;
+        font-weight: 400;
+        font-style: normal;
+    }
+
+    body {
+        background-color: #f9f5fe;
+    }
+
+    .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 8px;
+        color: #6b7280;
+        text-decoration: none;
+        margin-bottom: 4px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 12px;
+        width: 100%;
+    }
+
+    input[type="file"] {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 12px;
+        width: 100%;
+    }
+</style>
+
+</html>

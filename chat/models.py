@@ -62,28 +62,29 @@ class Message(models.Model):
     # when the message was created
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    # moderation / state fields from teammate's migration
-    # whether this message has been flagged for review
-    is_flagged = models.BooleanField(default=False)
-    # reason the message was flagged
-    flag_reason = models.CharField(max_length=255, blank=True, default='')
-    # whether this message has been edited
+    # editing
     is_edited = models.BooleanField(default=False)
-    # when the message was last edited
-    edited_at = models.DateTimeField(blank=True, null=True)
-    # whether this message has been deleted
+    edited_at = models.DateTimeField(null=True, blank=True)
+
+    # deleting (soft delete)
     is_deleted = models.BooleanField(default=False)
-    # when the message was deleted
-    deleted_at = models.DateTimeField(blank=True, null=True)
-    # whether this message is pinned
+    deleted_at = models.DateTimeField(null=True, blank=True)
+
+    # pinning / flagging
     is_pinned = models.BooleanField(default=False)
+    is_flagged = models.BooleanField(default=False)
+    flag_reason = models.CharField(max_length=255, blank=True)
 
     class Meta:
-        ordering = ["timestamp"]
+        # pinned messages first, then chronological
+        ordering = ["-is_pinned", "timestamp"]
 
-    # show username and either text or "[file]"
+    # show username and either text or "[file]" or "[deleted]"
     def __str__(self):
-        preview = self.content if self.content else "[file]"
+        if self.is_deleted:
+            preview = "[deleted]"
+        else:
+            preview = self.content if self.content else "[file]"
         return f"{self.user.username}: {preview}"
 
     # return just the file name (not the full path)
