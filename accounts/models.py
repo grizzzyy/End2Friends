@@ -3,6 +3,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from PIL import Image
 
+
 # Represents a user account, the thing that logs in
 class User(AbstractUser):
     nickname = models.CharField(max_length=50, blank=True, null=True)
@@ -15,22 +16,30 @@ class User(AbstractUser):
         return self.username
 
 
-# UserProfile is about how the user presents themselves — what others see.
-# User handles auth/credentials; UserProfile handles presentation, dashboard data, preferences, stats.
+# UserProfile handles presentation, dashboard data, preferences, stats.
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     avatar = models.ImageField(upload_to="profiles/", blank=True, null=True)
     display_name = models.CharField(max_length=50, blank=True, null=True)
+    profile_pic = models.ImageField(upload_to="avatars/", default="avatars/default.png")
     bio = models.TextField(blank=True, null=True)
+
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        if self.avatar:
-            img = Image.open(self.avatar.path)
 
-            if img.height > 100 or img.width > 100:
-                new_img = (100, 100)
-                img.thumbnail(new_img)
-                img.save(self.avatar.path)
+        # Safely process avatar image
+        if self.avatar and hasattr(self.avatar, "path"):
+            try:
+                img = Image.open(self.avatar.path)
+
+                if img.height > 100 or img.width > 100:
+                    img.thumbnail((100, 100))
+                    img.save(self.avatar.path)
+
+            except Exception:
+                # File missing, invalid, or no extension — skip processing
+                pass
+
     def __str__(self):
         return self.display_name or self.user.username
 
@@ -41,6 +50,7 @@ class Task(models.Model):
         ('medium', 'Medium'),
         ('low', 'Low'),
     ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tasks')
     title = models.CharField(max_length=200)
     channel = models.CharField(max_length=100, blank=True, default='#reminders')
@@ -79,6 +89,7 @@ class PomodoroSession(models.Model):
         ('paused', 'Paused'),
         ('break', 'Break'),
     ]
+
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pomodoro')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
     minutes_remaining = models.PositiveIntegerField(default=25)
@@ -112,6 +123,7 @@ class Activity(models.Model):
         ('file', 'File Upload'),
         ('message', 'New Messages'),
     ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='activities')
     activity_type = models.CharField(max_length=20, choices=TYPE_CHOICES)
     channel = models.CharField(max_length=100)
