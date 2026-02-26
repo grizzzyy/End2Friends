@@ -50,9 +50,13 @@ def chat_room(request, room_name):
     except Exception:
         pass
 
+    # Get user's channels for sidebar
+    user_channels = request.user.channels.all()
+
     return render(request, "chat/chat.html", {
         "room_name": room_name,
         "messages": messages,
         "conversation": conversation,
+        "channels": user_channels,
         "other_user": other_user,
     })

@@ -186,9 +186,9 @@
                 </form>
             </div>
 
-            <!-- Pomodoro Status Card -->
-            <div class="bg-white rounded-xl shadow p-6 mt-6 max-w-md mx-auto">
-                <h2 class="text-lg font-bold text-gray-800 mb-4 text-center">Pomodoro Timer</h2>
+    <!-- Pomodoro Status Card -->
+    <div class="bg-white rounded-xl shadow p-6 mt-6 max-w-md mx-auto">
+        <h2 class="text-lg font-bold text-gray-800 mb-4 text-center">Pomodoro Timer</h2>
 
                 <div class="flex flex-col items-center gap-4">
 
@@ -205,11 +205,11 @@
                         </div>
                     </div>
 
-                    <!-- Status -->
-                    <div class="text-center">
-                        <p class="text-sm text-gray-500 mb-1">Status</p>
-                        <p id="pomo-status" class="text-gray-800 font-medium">Not started</p>
-                    </div>
+            <!-- Status -->
+            <div class="text-center">
+                <p class="text-sm text-gray-500 mb-1">Status</p>
+                <p id="pomo-status" class="text-gray-800 font-medium">Not started</p>
+            </div>
 
                     <!-- Buttons -->
                     <div class="flex gap-2">
@@ -226,8 +226,8 @@
                 </div>
             </div>
 
-            <!-- Activity & Study Rooms Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+    <!-- Activity & Study Rooms Row -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
 
                 <!-- Recent Activity Card -->
                 <div class="bg-white rounded-xl shadow p-6">
@@ -306,7 +306,20 @@
         let isRunning = false;
         let isBreak = false;
         let timerInterval = null;
+    <script>
+        const WORK_DURATION = 25 * 60;
+        const BREAK_DURATION = 5 * 60;
 
+        let timeLeft = WORK_DURATION;
+        let isRunning = false;
+        let isBreak = false;
+        let timerInterval = null;
+
+        const progressCircle = document.getElementById('pomo-progress');
+        const timeDisplay = document.getElementById('pomo-time');
+        const statusText = document.getElementById('pomo-status');
+        const toggleBtn = document.getElementById('pomo-btn');
+        const circumference = 314;
         const progressCircle = document.getElementById('pomo-progress');
         const timeDisplay = document.getElementById('pomo-time');
         const statusText = document.getElementById('pomo-status');
@@ -324,6 +337,20 @@
             progressCircle.style.stroke = isBreak ? '#f5b4e0ff' : '#a855f7';
         }
 
+        function updateStatus() {
+            if (!isRunning && timeLeft === (isBreak ? BREAK_DURATION : WORK_DURATION)) {
+                statusText.textContent = isBreak ? 'Break ready' : 'Not started';
+                toggleBtn.textContent = 'Start';
+            } else if (isRunning) {
+                const minutes = Math.floor(timeLeft / 60);
+                statusText.textContent = isBreak ? 'Break in progress' : `${minutes} minutes remaining`;
+                toggleBtn.textContent = 'Pause';
+            } else {
+                const minutes = Math.floor(timeLeft / 60);
+                statusText.textContent = `Paused - ${minutes}m left`;
+                toggleBtn.textContent = 'Resume';
+            }
+        }
         function updateStatus() {
             if (!isRunning && timeLeft === (isBreak ? BREAK_DURATION : WORK_DURATION)) {
                 statusText.textContent = isBreak ? 'Break ready' : 'Not started';
@@ -372,6 +399,14 @@
             updateStatus();
         }
 
+        function resetPomodoro() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            isBreak = false;
+            timeLeft = WORK_DURATION;
+            updateDisplay();
+            updateStatus();
+        }
         function resetPomodoro() {
             clearInterval(timerInterval);
             isRunning = false;

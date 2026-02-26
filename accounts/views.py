@@ -54,6 +54,20 @@ def logout_view(request):
 
 
 @login_required
+def messages_view(request):
+    """Messages page with empty state"""
+    return render(request, "accounts/messages.html", {
+        "direct_messages": [],  # Empty for now - ready for future DM feature
+    })
+
+
+@login_required
+def settings_view(request):
+    """Settings page with empty state"""
+    return render(request, "accounts/settings.html")
+
+
+@login_required
 def dashboard_view(request):
     if request.method == "POST":
         if "add_task" in request.POST:
