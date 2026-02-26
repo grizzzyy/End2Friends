@@ -60,3 +60,16 @@ def chat_room(request, room_name):
         "channels": user_channels,
         "other_user": other_user,
     })
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def delete_conversation(request, room_id):
+    convo = get_object_or_404(Conversation, room_id=room_id)
+
+    # Only allow participants to delete
+    if request.user in convo.participants.all():
+        convo.delete()
+
+    return redirect('inbox')

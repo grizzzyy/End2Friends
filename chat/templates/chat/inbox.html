@@ -1,170 +1,57 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Messages - End2Friend</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=arrow_back,chat,drone_2,person" />
-    <style>
-        body { font-family: "Varela Round", sans-serif; }
-        .nav-link { display:flex; align-items:center; gap:12px; padding:12px; border-radius:8px; color:#6b7280; text-decoration:none; margin-bottom:4px; }
-        .nav-link:hover { background:#f3e8ff; color:#7c3aed; }
-    </style>
-</head>
-<body class="bg-purple-50 min-h-screen flex">
+{% extends "base.html" %}
+{% block title %}Messages - End2Friend{% endblock %}
 
-    <!-- Sidebar -->
-  <aside class="w-72 bg-white flex flex-col border-r border-gray-200">
+{% block content %}
 
-    <!-- Logo -->
-    <div class="p-4 border-b border-gray-100">
-        <div class="flex items-center gap-2 text-purple-600">
-            <span class="material-symbols-outlined">drone_2</span>
-            <h1 class="font-bold text-lg">End2Friend</h1>
-        </div>
-    </div>
+<main class="flex-1 p-8 max-w-2xl">
 
-    <!-- Search -->
-    <div class="p-4">
-        <div class="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-2.5">
-            <span class="material-symbols-outlined text-gray-400 text-xl">search</span>
-            <input type="text" placeholder="Search..." class="bg-transparent text-sm flex-1 outline-none text-gray-600">
-        </div>
-    </div>
+    <h1 class="text-xl font-bold text-gray-800 mb-6">Messages</h1>
 
-    <!-- CHANNELS -->
-    <div class="px-4 mb-2">
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Channels</p>
-    </div>
-
-    <div class="flex-1 overflow-y-auto px-3">
-        {% for channel in channels %}
-        <a href="{% url 'chat_room' channel.name %}"
-           class="channel-item {% if channel.name == room_name %}active{% endif %}">
-            <div class="relative">
-                <div class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold"
-                     style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
-                    {{ channel.name|first|upper }}
-                </div>
-                <div class="online-dot"></div>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="font-medium text-gray-800 text-sm">#{{ channel.name }}</p>
-                <p class="text-xs text-gray-400 truncate">Click to open chat</p>
-            </div>
-        </a>
-        {% empty %}
-        <p class="text-center text-gray-400 text-sm py-4">No channels yet</p>
-        {% endfor %}
-    </div>
-
-    <!-- DIRECT MESSAGES -->
-    <div class="px-4 mt-4 mb-2">
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Direct Messages</p>
-    </div>
-
-    <div class="flex-1 overflow-y-auto px-3">
+    <!-- DM List (with delete button, no message previews) -->
+    <div class="bg-white rounded-xl shadow divide-y divide-gray-100">
         {% for convo in conversations %}
-        <a href="{% url 'chat_room' convo.room_id %}"
-           class="channel-item {% if convo.room_id == room_name %}active{% endif %}">
-            <div class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold"
-                 style="background: linear-gradient(135deg, #7C3AED 0%, #C4B5FD 100%);">
-                {% for p in convo.participants.all %}
-                    {% if p != request.user %}{{ p.username|first|upper }}{% endif %}
-                {% endfor %}
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="font-medium text-gray-800 text-sm">
-                    {% for p in convo.participants.all %}
-                        {% if p != request.user %}{{ p.username }}{% endif %}
-                    {% endfor %}
-                </p>
-                <p class="text-xs text-gray-400 truncate">
-                    {% with last=convo.messages.last %}
-                        {% if last %}{{ last.content|truncatechars:40 }}{% else %}No messages yet{% endif %}
-                    {% endwith %}
-                </p>
-            </div>
-        </a>
-        {% empty %}
-        <p class="text-center text-gray-400 text-sm py-4">No conversations yet</p>
-        {% endfor %}
-    </div>
+        <div class="flex items-center gap-3 p-4 hover:bg-purple-50 transition">
 
-    <!-- Bottom Nav -->
-    <div class="p-3 border-t border-gray-100 space-y-1">
-        <a href="{% url 'dashboard' %}" class="info-link">
-            <span class="material-symbols-outlined text-lg">dashboard</span>
-            Dashboard
-        </a>
-        <a href="{% url 'people' %}" class="info-link">
-            <span class="material-symbols-outlined text-lg">person</span>
-            People
-        </a>
-        <a href="{% url 'inbox' %}" class="info-link">
-            <span class="material-symbols-outlined text-lg">chat</span>
-            Messages
-        </a>
-    </div>
+            <!-- Clickable DM -->
+            <a href="{% url 'chat_room' convo.room_id %}" class="flex items-center gap-3 flex-1">
 
-</aside>
-
-
-    <!-- Main -->
-    <main class="flex-1 p-8 max-w-2xl">
-        <h1 class="text-xl font-bold text-gray-800 mb-6">Messages</h1>
-
-        <!-- Start new DM -->
-        <div class="bg-white rounded-xl shadow p-4 mb-6">
-            <p class="text-sm text-gray-500 mb-2">Start a new conversation</p>
-            <div class="flex gap-2">
-                <input type="text" id="dm-username" placeholder="Enter a username..."
-                    class="flex-1 border border-purple-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400" />
-                <button onclick="startDM()"
-                    class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
-                    Message
-                </button>
-            </div>
-        </div>
-
-        <!-- Conversation List -->
-        <div class="bg-white rounded-xl shadow divide-y divide-gray-100">
-            {% for convo in conversations %}
-            <a href="{% url 'chat_room' convo.room_id %}" class="flex items-center gap-3 p-4 hover:bg-purple-50 transition">
+                <!-- Avatar -->
                 <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center font-bold text-purple-700">
                     {% for participant in convo.participants.all %}
-                        {% if participant != request.user %}{{ participant.username|first|upper }}{% endif %}
+                        {% if participant != request.user %}
+                            {{ participant.username|first|upper }}
+                        {% endif %}
                     {% endfor %}
                 </div>
+
+                <!-- Username -->
                 <div class="flex-1">
                     <p class="text-gray-800 font-medium text-sm">
                         {% for participant in convo.participants.all %}
-                            {% if participant != request.user %}{{ participant.username }}{% endif %}
+                            {% if participant != request.user %}
+                                {{ participant.username }}
+                            {% endif %}
                         {% endfor %}
                     </p>
-                    <p class="text-xs text-gray-400">
-                        {% with last=convo.messages.last %}
-                            {% if last %}{{ last.content|truncatechars:40 }}{% else %}No messages yet{% endif %}
-                        {% endwith %}
-                    </p>
                 </div>
+
             </a>
-            {% empty %}
-            <div class="p-6 text-center text-gray-400 text-sm">No conversations yet. Start one above or find someone in People!</div>
-            {% endfor %}
+
+            <!-- Delete button -->
+            <a href="{% url 'delete_conversation' convo.room_id %}"
+               class="text-red-500 text-xs hover:underline"
+               onclick="return confirm('Delete this conversation?');">
+                Delete
+            </a>
+
         </div>
-    </main>
+        {% empty %}
+        <div class="p-6 text-center text-gray-400 text-sm">
+            No conversations yet. Go to People and start one!
+        </div>
+        {% endfor %}
+    </div>
 
-    <script>
-        function startDM() {
-            const username = document.getElementById('dm-username').value.trim();
-            if (username) window.location.href = `/chat/dm/${username}/`;
-        }
-        document.getElementById('dm-username').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') startDM();
-        });
-    </script>
+</main>
 
-</body>
-</html>
+{% endblock %}

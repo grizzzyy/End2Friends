@@ -1,18 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{% if other_user %}{{ other_user.username }}{% else %}{{ room_name }}{% endif %} - Chat</title>
-
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
-    <!-- Main font -->
-    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
-
-    <!-- REQUIRED for all Material Symbols icons -->
-    <link rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-</head>
+{% extends "base.html" %}
+{% block title %}Chat - End2Friend{% endblock %}
+{% block content %}
 
 <body class="bg-gray-100">
     <div class="flex h-screen">
@@ -393,4 +381,4 @@
         .info-link:hover { background: #f3e8ff; color: #7c3aed; }
    
     </style>
-</html>
+{% endblock %}
