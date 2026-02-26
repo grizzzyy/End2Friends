@@ -15,32 +15,101 @@
 <body class="bg-purple-50 min-h-screen flex">
 
     <!-- Sidebar -->
-    <aside class="w-56 bg-white shadow-md flex flex-col">
-        <div class="p-5 flex items-center gap-2 text-purple-600 border-b border-purple-100">
+  <aside class="w-72 bg-white flex flex-col border-r border-gray-200">
+
+    <!-- Logo -->
+    <div class="p-4 border-b border-gray-100">
+        <div class="flex items-center gap-2 text-purple-600">
             <span class="material-symbols-outlined">drone_2</span>
             <h1 class="font-bold text-lg">End2Friend</h1>
         </div>
-        <div class="p-5 flex items-center gap-3 border-b border-purple-100">
-            <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center">
-                <span class="material-symbols-outlined text-purple-600">person</span>
-            </div>
-            <span class="text-gray-700 text-sm">{{ request.user.username }}</span>
+    </div>
+
+    <!-- Search -->
+    <div class="p-4">
+        <div class="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-2.5">
+            <span class="material-symbols-outlined text-gray-400 text-xl">search</span>
+            <input type="text" placeholder="Search..." class="bg-transparent text-sm flex-1 outline-none text-gray-600">
         </div>
-        <nav class="flex-1 p-4">
-            <a href="{% url 'dashboard' %}" class="nav-link">
-                <span class="material-symbols-outlined">arrow_back</span>
-                Dashboard
-            </a>
-            <a href="{% url 'people' %}" class="nav-link">
-                <span class="material-symbols-outlined">person</span>
-                People
-            </a>
-            <a href="{% url 'inbox' %}" class="nav-link" style="background:#ede9fe; color:#7c3aed;">
-                <span class="material-symbols-outlined">chat</span>
-                Messages
-            </a>
-        </nav>
-    </aside>
+    </div>
+
+    <!-- CHANNELS -->
+    <div class="px-4 mb-2">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Channels</p>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-3">
+        {% for channel in channels %}
+        <a href="{% url 'chat_room' channel.name %}"
+           class="channel-item {% if channel.name == room_name %}active{% endif %}">
+            <div class="relative">
+                <div class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold"
+                     style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
+                    {{ channel.name|first|upper }}
+                </div>
+                <div class="online-dot"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-800 text-sm">#{{ channel.name }}</p>
+                <p class="text-xs text-gray-400 truncate">Click to open chat</p>
+            </div>
+        </a>
+        {% empty %}
+        <p class="text-center text-gray-400 text-sm py-4">No channels yet</p>
+        {% endfor %}
+    </div>
+
+    <!-- DIRECT MESSAGES -->
+    <div class="px-4 mt-4 mb-2">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Direct Messages</p>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-3">
+        {% for convo in conversations %}
+        <a href="{% url 'chat_room' convo.room_id %}"
+           class="channel-item {% if convo.room_id == room_name %}active{% endif %}">
+            <div class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold"
+                 style="background: linear-gradient(135deg, #7C3AED 0%, #C4B5FD 100%);">
+                {% for p in convo.participants.all %}
+                    {% if p != request.user %}{{ p.username|first|upper }}{% endif %}
+                {% endfor %}
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-800 text-sm">
+                    {% for p in convo.participants.all %}
+                        {% if p != request.user %}{{ p.username }}{% endif %}
+                    {% endfor %}
+                </p>
+                <p class="text-xs text-gray-400 truncate">
+                    {% with last=convo.messages.last %}
+                        {% if last %}{{ last.content|truncatechars:40 }}{% else %}No messages yet{% endif %}
+                    {% endwith %}
+                </p>
+            </div>
+        </a>
+        {% empty %}
+        <p class="text-center text-gray-400 text-sm py-4">No conversations yet</p>
+        {% endfor %}
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="p-3 border-t border-gray-100 space-y-1">
+        <a href="{% url 'dashboard' %}" class="info-link">
+            <span class="material-symbols-outlined text-lg">dashboard</span>
+            Dashboard
+        </a>
+        <a href="{% url 'people' %}" class="info-link">
+            <span class="material-symbols-outlined text-lg">person</span>
+            People
+        </a>
+        <a href="{% url 'inbox' %}" class="info-link">
+            <span class="material-symbols-outlined text-lg">chat</span>
+            Messages
+        </a>
+    </div>
+
+</aside>
+
 
     <!-- Main -->
     <main class="flex-1 p-8 max-w-2xl">

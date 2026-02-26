@@ -3,206 +3,191 @@
 <head>
     <meta charset="UTF-8">
     <title>{% if other_user %}{{ other_user.username }}{% else %}{{ room_name }}{% endif %} - Chat</title>
+
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- Main font -->
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=add,chat,dashboard,drone_2,group,info,logout,person,search,send,settings,star,tag" />
-    <style>
-        body { font-family: 'Varela Round', sans-serif; }
-        
-        /* Channel item in sidebar */
-        .channel-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .channel-item:hover { background: #f3e8ff; }
-        .channel-item.active { background: #ede9fe; }
-        
-        /* Online status dot */
-        .online-dot {
-            width: 10px;
-            height: 10px;
-            background: #9B76B4;
-            border-radius: 50%;
-            border: 2px solid white;
-            position: absolute;
-            bottom: 0;
-            right: 0;
-        }
-        
-        /* Message bubbles */
-        .msg-sent {
-            background: linear-gradient(135deg, #9B76B4 0%, #7c3aed 100%);
-            color: white;
-            border-radius: 18px 18px 4px 18px;
-        }
-        .msg-received {
-            background: white;
-            color: #374151;
-            border-radius: 18px 18px 18px 4px;
-        }
-        
-        /* Info panel link */
-        .info-link {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px 12px;
-            border-radius: 8px;
-            color: #6b7280;
-            font-size: 14px;
-            transition: all 0.15s;
-        }
-        .info-link:hover { background: #f3e8ff; color: #7c3aed; }
-    </style>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=arrow_back,send" />
-    <style>
-        body { font-family: "Varela Round", sans-serif; }
-    </style>
+
+    <!-- REQUIRED for all Material Symbols icons -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 </head>
+
 <body class="bg-gray-100">
     <div class="flex h-screen">
 
         <!-- LEFT SIDEBAR - Channels List -->
         <aside class="w-72 bg-white flex flex-col border-r border-gray-200">
-            
-            <!-- Logo & Create Button -->
-            <div class="p-4 border-b border-gray-100">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2 text-purple-600">
-                        <span class="material-symbols-outlined">drone_2</span>
-                        <h1 class="font-bold text-lg">End2Friend</h1>
-                    </div>
-                </div>
-                <a href="{% url 'dashboard' %}" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 rounded-xl text-white text-sm font-medium" style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
-                    <span class="material-symbols-outlined text-sm">add</span>
-                    Create New
-                </a>
-            </div>
 
-            <!-- Search -->
-            <div class="p-4">
-                <div class="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-2.5">
-                    <span class="material-symbols-outlined text-gray-400 text-xl">search</span>
-                    <input type="text" placeholder="Search..." class="bg-transparent text-sm flex-1 outline-none text-gray-600">
-                </div>
-            </div>
+    <!-- Logo -->
+    <div class="p-4 border-b border-gray-100">
+        <div class="flex items-center gap-2 text-purple-600">
+            <span class="material-symbols-outlined">drone_2</span>
+            <h1 class="font-bold text-lg">End2Friend</h1>
+        </div>
+    </div>
 
-            <!-- Chat Label -->
-            <div class="px-4 mb-2">
-                <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Chat</p>
-            </div>
+    <!-- Search -->
+    <div class="p-4">
+        <div class="flex items-center gap-2 bg-gray-100 rounded-xl px-4 py-2.5">
+            <span class="material-symbols-outlined text-gray-400 text-xl">search</span>
+            <input type="text" placeholder="Search..." class="bg-transparent text-sm flex-1 outline-none text-gray-600">
+        </div>
+    </div>
 
-            <!-- Channels List -->
-            <div class="flex-1 overflow-y-auto px-3">
-                {% for channel in channels %}
-                <a href="{% url 'chat_room' channel.name %}" class="channel-item {% if channel.name == room_name %}active{% endif %}">
-                    <!-- Avatar with online dot -->
-                    <div class="relative">
-                        <div class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold" style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
-                            {{ channel.name|first|upper }}
-                        </div>
-                        <div class="online-dot"></div>
-                    </div>
-                    <!-- Channel info -->
-                    <div class="flex-1 min-w-0">
-                        <p class="font-medium text-gray-800 text-sm">#{{ channel.name }}</p>
-                        <p class="text-xs text-gray-400 truncate">Click to open chat</p>
-                    </div>
-                </a>
-                {% empty %}
-                <div class="text-center py-8">
-                    <p class="text-sm text-gray-400">No channels yet</p>
-                    <a href="{% url 'dashboard' %}" class="text-purple-600 text-sm hover:underline">Create one</a>
+    <!-- CHANNELS -->
+    <div class="px-4 mb-2">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Channels</p>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-3">
+        {% for channel in channels %}
+        <a href="{% url 'chat_room' channel.name %}"
+           class="channel-item {% if channel.name == room_name %}active{% endif %}">
+            <div class="relative">
+                <div class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold"
+                     style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
+                    {{ channel.name|first|upper }}
                 </div>
+                <div class="online-dot"></div>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-800 text-sm">#{{ channel.name }}</p>
+                <p class="text-xs text-gray-400 truncate">Click to open chat</p>
+            </div>
+        </a>
+        {% empty %}
+        <p class="text-center text-gray-400 text-sm py-4">No channels yet</p>
+        {% endfor %}
+    </div>
+
+    <!-- DIRECT MESSAGES -->
+    <div class="px-4 mt-4 mb-2">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wide">Direct Messages</p>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-3">
+        {% for convo in conversations %}
+        <a href="{% url 'chat_room' convo.room_id %}"
+           class="channel-item {% if convo.room_id == room_name %}active{% endif %}">
+            <div class="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold"
+                 style="background: linear-gradient(135deg, #7C3AED 0%, #C4B5FD 100%);">
+                {% for p in convo.participants.all %}
+                    {% if p != request.user %}{{ p.username|first|upper }}{% endif %}
                 {% endfor %}
             </div>
-
-            <!-- Bottom Nav -->
-            <div class="p-3 border-t border-gray-100 space-y-1">
-                <a href="{% url 'dashboard' %}" class="info-link">
-                    <span class="material-symbols-outlined text-lg">dashboard</span>
-                    Dashboard
-                </a>
+            <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-800 text-sm">
+                    {% for p in convo.participants.all %}
+                        {% if p != request.user %}{{ p.username }}{% endif %}
+                    {% endfor %}
+                </p>
+                <p class="text-xs text-gray-400 truncate">
+                    {% with last=convo.messages.last %}
+                        {% if last %}{{ last.content|truncatechars:40 }}{% else %}No messages yet{% endif %}
+                    {% endwith %}
+                </p>
             </div>
-        </aside>
+        </a>
+        {% empty %}
+        <p class="text-center text-gray-400 text-sm py-4">No conversations yet</p>
+        {% endfor %}
+    </div>
+
+    <!-- Bottom Nav -->
+    <div class="p-3 border-t border-gray-100 space-y-1">
+        <a href="{% url 'dashboard' %}" class="info-link">
+            <span class="material-symbols-outlined text-lg">dashboard</span>
+            Dashboard
+        </a>
+        <a href="{% url 'people' %}" class="info-link">
+            <span class="material-symbols-outlined text-lg">person</span>
+            People
+        </a>
+        <a href="{% url 'inbox' %}" class="info-link">
+            <span class="material-symbols-outlined text-lg">chat</span>
+            Messages
+        </a>
+    </div>
+
+</aside>
+
 
         <!-- MIDDLE - Chat Area -->
         <main class="flex-1 flex flex-col bg-purple-50">
             
             <!-- Chat Header -->
             <div class="p-4 bg-white border-b border-gray-200 flex items-center gap-4">
-                <div class="relative">
-                    <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg" style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
-                        {{ room_name|first|upper }}
-                    </div>
-                    <div class="online-dot"></div>
-                </div>
-                {% endif %}
-                <div class="max-w-xs">
-                    {% if message.user != request.user %}
-                    <p class="text-xs text-gray-400 mb-1">{{ message.user.username }}</p>
-                    {% endif %}
-                    <div class="rounded-xl px-3 py-2 text-sm
-                        {% if message.user == request.user %}
-                        bg-purple-600 text-white rounded-tr-none
-                        {% else %}
-                        bg-gray-100 text-gray-800 rounded-tl-none
-                        {% endif %}">
+    <div class="relative">
+        <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg" style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
+            {{ room_name|first|upper }}
+        </div>
+        <div class="online-dot"></div>
+    </div>
+
+    <div class="max-w-xs">
+        {% if message.user != request.user %}
+        <p class="text-xs text-gray-400 mb-1">{{ message.user.username }}</p>
+        {% endif %}
+        <div class="rounded-xl px-3 py-2 text-sm
+            {% if message.user == request.user %}
+            bg-purple-600 text-white rounded-tr-none
+            {% else %}
+            bg-gray-100 text-gray-800 rounded-tl-none
+            {% endif %}">
+            {{ message.content }}
+        </div>
+        <p class="text-xs text-gray-400 mt-1">{{ message.timestamp|timesince }} ago</p>
+    </div>
+</div>
+
+
+<!-- Messages Area -->
+<div id="chat-log" class="flex-1 overflow-y-auto p-6 space-y-4">
+    {% for message in messages %}
+        {% if message.user == request.user %}
+            <!-- Sent message (right side) -->
+            <div class="flex justify-end">
+                <div class="max-w-md">
+                    <p class="text-xs text-gray-400 text-right mb-1">{{ message.timestamp|timesince }} ago</p>
+                    <div class="msg-sent px-4 py-3 text-sm shadow-sm">
                         {{ message.content }}
                     </div>
-                    <p class="text-xs text-gray-400 mt-1">{{ message.timestamp|timesince }} ago</p>
                 </div>
             </div>
-
-            <!-- Messages Area -->
-            <div id="chat-log" class="flex-1 overflow-y-auto p-6 space-y-4">
-                {% for message in messages %}
-                <!-- Check if message is from current user -->
-                {% if message.user == request.user %}
-                <!-- Sent message (right side) -->
-                <div class="flex justify-end">
-                    <div class="max-w-md">
-                        <p class="text-xs text-gray-400 text-right mb-1">{{ message.timestamp|timesince }} ago</p>
-                        <div class="msg-sent px-4 py-3 text-sm shadow-sm">
-                            {{ message.content }}
-                        </div>
+        {% else %}
+            <!-- Received message (left side) -->
+            <div class="flex gap-3">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                     style="background: linear-gradient(135deg, #7C3AED 0%, #C4B5FD 100%);">
+                    {{ message.user.username|first|upper }}
+                </div>
+                <div class="max-w-md">
+                    <p class="text-xs text-gray-500 mb-1">
+                        <span class="font-medium text-gray-700">{{ message.user.username }}</span>
+                        · {{ message.timestamp|timesince }} ago
+                    </p>
+                    <div class="msg-received px-4 py-3 text-sm shadow-sm">
+                        {{ message.content }}
                     </div>
                 </div>
-                {% else %}
-                <!-- Received message (left side) -->
-                <div class="flex gap-3">
-                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background: linear-gradient(135deg, #7C3AED 0%, #C4B5FD 100%);">
-                        {{ message.user.username|first|upper }}
-                    </div>
-                    <div class="max-w-md">
-                        <p class="text-xs text-gray-500 mb-1">
-                            <span class="font-medium text-gray-700">{{ message.user.username }}</span>
-                            · {{ message.timestamp|timesince }} ago
-                        </p>
-                        <div class="msg-received px-4 py-3 text-sm shadow-sm">
-                            {{ message.content }}
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-                {% empty %}
-                <!-- Empty state -->
-                <div class="flex flex-col items-center justify-center h-full text-center">
-                    <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4" style="background: linear-gradient(135deg, #E8B4D4 0%, #C4B5FD 100%);">
-                        <span class="material-symbols-outlined text-4xl text-white">chat</span>
-                    </div>
-                    <h3 class="text-xl font-bold text-gray-700 mb-2">Welcome to #{{ room_name }}</h3>
-                    <p class="text-sm text-gray-400">This is the start of your conversation.<br>Say hello!</p>
-                </div>
-                {% empty %}
+            </div>
+        {% endif %}
+    {% empty %}
+        <!-- Empty state -->
+        <div class="flex flex-col items-center justify-center h-full text-center">
+            <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4"
+                 style="background: linear-gradient(135deg, #E8B4D4 0%, #C4B5FD 100%);">
+                <span class="material-symbols-outlined text-4xl text-white">chat</span>
+            </div>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">Welcome to #{{ room_name }}</h3>
+            <p class="text-sm text-gray-400">This is the start of your conversation.<br>Say hello!</p>
             <p class="text-center text-gray-400 text-sm mt-8">No messages yet. Say hello!</p>
-            {% endfor %}
-            </div>
+        </div>
+    {% endfor %}
+</div>
+
 
             <!-- Input Area -->
             <div class="p-4 bg-white border-t border-gray-200">
@@ -285,8 +270,12 @@
 
     </div>
 
-    <script>
+   
+</body>
+
+ <script>
         const roomName = "{{ room_name }}";
+        const currentUser = "{{ request.user.username }}";
         const chatLog = document.getElementById('chat-log');
         chatLog.scrollTop = chatLog.scrollHeight;
 
@@ -349,7 +338,59 @@
             socket.send(JSON.stringify({ message: msg }));
             input.value = '';
         }
-    </script>
-
-</body>
+</script>
+<style>
+        body { font-family: 'Varela Round', sans-serif; }
+        
+        /* Channel item in sidebar */
+        .channel-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .channel-item:hover { background: #f3e8ff; }
+        .channel-item.active { background: #ede9fe; }
+        
+        /* Online status dot */
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            background: #9B76B4;
+            border-radius: 50%;
+            border: 2px solid white;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+        }
+        
+        /* Message bubbles */
+        .msg-sent {
+            background: linear-gradient(135deg, #9B76B4 0%, #7c3aed 100%);
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+        }
+        .msg-received {
+            background: white;
+            color: #374151;
+            border-radius: 18px 18px 18px 4px;
+        }
+        
+        /* Info panel link */
+        .info-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: #6b7280;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+        .info-link:hover { background: #f3e8ff; color: #7c3aed; }
+   
+    </style>
 </html>
