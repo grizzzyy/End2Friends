@@ -34,9 +34,9 @@
                 <span class="text-gray-700 text-sm">{{ user.username }}</span>
             </div>
 
-            <!-- Nav Links -->
+            <!-- Nav Links HEHEHEHE-->
             <nav class="flex-1 p-4">
-                <a href="#" class="nav-link active">
+                <a href="{% url 'dashboard' %}" class="nav-link active">
                     <span class="material-symbols-outlined">dashboard</span>
                     Dashboard
                 </a>
@@ -44,11 +44,11 @@
                     <span class="material-symbols-outlined">person</span>
                     Profile
                 </a>
-                <a href="#" class="nav-link">
+                <a href="{% url 'messages_page' %}" class="nav-link">
                     <span class="material-symbols-outlined">chat</span>
                     Messages
                 </a>
-                <a href="#" class="nav-link">
+                <a href="{% url 'settings_page' %}" class="nav-link">
                     <span class="material-symbols-outlined">settings</span>
                     Settings
                 </a>
