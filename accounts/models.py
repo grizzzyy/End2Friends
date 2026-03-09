@@ -81,24 +81,31 @@ class Channel(models.Model):
         return f"#{self.name}"
 
 
+# accounts/models.py — PomodoroSession, FIXED:
 class PomodoroSession(models.Model):
-    """Tracks a user's Pomodoro timer session."""
     STATUS_CHOICES = [
         ('not_started', 'Not Started'),
         ('running', 'Running'),
         ('paused', 'Paused'),
         ('break', 'Break'),
+        ('completed', 'Completed'), # <-- add this
     ]
-
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pomodoro')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='not_started')
-    minutes_remaining = models.PositiveIntegerField(default=25)
+    # CHANGED: OneToOneField → ForeignKey
+    user = models.ForeignKey(
+    settings.AUTH_USER_MODEL,
+    on_delete=models.CASCADE,
+    related_name='pomodoro_sessions' # note: plural now
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES,
+    default='not_started')
     session_duration = models.PositiveIntegerField(default=25)
     break_duration = models.PositiveIntegerField(default=5)
+    cycles_completed = models.PositiveIntegerField(default=0) # <-- add
+    started_at = models.DateTimeField(auto_now_add=True) # <-- add
+    ended_at = models.DateTimeField(null=True, blank=True) # <-- add
     updated_at = models.DateTimeField(auto_now=True)
-
     def __str__(self):
-        return f"{self.user.username}'s Pomodoro"
+        return f"{self.user.username} session {self.id}"
 
 
 class Reminder(models.Model):
