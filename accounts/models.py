@@ -113,7 +113,12 @@ class Reminder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reminders')
     title = models.CharField(max_length=200)
     remind_at = models.DateTimeField()
-    channel = models.CharField(max_length=100, blank=True, default='#general')
+    # Change channel from CharField to ForeignKey
+    channel = models.ForeignKey(
+        'chat.Channel',
+        on_delete=models.SET_NULL,
+        null=True, blank=True
+        )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
