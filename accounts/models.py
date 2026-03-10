@@ -142,17 +142,3 @@ class Activity(models.Model):
 
     def __str__(self):
         return f"{self.activity_type} in {self.channel}"
-
-
-class StudyRoom(models.Model):
-    """Private study rooms for collaboration."""
-    name = models.CharField(max_length=100)
-    members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='account_study_rooms')
-    active_members = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='account_active_in_rooms', blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
-    def active_count(self):
-        return self.active_members.count()

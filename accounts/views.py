@@ -3,6 +3,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from rooms.models import StudyRoom
 
 User = get_user_model()
 
@@ -21,7 +22,6 @@ from .models import (
     PomodoroSession,
     Reminder,
     Activity,
-    StudyRoom,
 )
 
 def register_view(request):
@@ -97,11 +97,7 @@ def dashboard_view(request):
         remind_at__gte=timezone.now()
     )[:5]
     activities = Activity.objects.filter(user=request.user)[:4]
-    study_rooms = (
-        request.user.study_rooms.all()[:4]
-        if hasattr(request.user, "study_rooms")
-        else StudyRoom.objects.filter(members=request.user)[:4]
-    )
+    study_rooms = StudyRoom.objects.filter(memberships__user=request.user)[:4]
 
     return render(
         request,
