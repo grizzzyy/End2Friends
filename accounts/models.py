@@ -69,8 +69,10 @@ class Task(models.Model):
     
     # Add a description field for more detail
     description = models.TextField(blank=True)
+
     # updated time stamp
-    updated_at = models.DateTimeField(blank=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
     class Meta:
         ordering = ['due_date', '-priority']
 
