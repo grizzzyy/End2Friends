@@ -4,24 +4,44 @@ import json
 import traceback
 
 class ChatConsumer(AsyncWebsocketConsumer):
+
     async def connect(self):
         try:
             self.room_id = self.scope['url_route']['kwargs']['room_name']
             self.room_group_name = f'chat_{self.room_id}'
 
-            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            # AUTH GUARD — reject unauthenticated users immediately
+            user = self.scope['user']
+            if not user.is_authenticated:
+                await self.close()
+                return
+
+            # PARTICIPANT CHECK — user must be in this conversation
+            is_member = await self.user_in_conversation(user, self.room_id)
+            if not is_member:
+                await self.close()
+                return
+
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name
+            )
+
             await self.accept()
-            print(f"[WS] Connected: {self.room_id} | User: {self.scope['user']}")
+            print(f'[WS] Connected: {self.room_id} | User: {user}')
 
         except Exception as e:
-            print(f"[WS ERROR] Connect failed: {e}")
+            print(f'[WS ERROR] Connect failed: {e}')
             traceback.print_exc()
             await self.close()
 
     async def disconnect(self, close_code):
         print(f"[WS] Disconnected: code={close_code}")
         try:
-            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
         except Exception as e:
             print(f"[WS ERROR] Disconnect error: {e}")
 
@@ -34,7 +54,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             print(f"[WS] Message from {user}: {message}")
 
             if not message or not user.is_authenticated:
-                print(f"[WS] Rejected - empty message or unauthenticated user")
+                print("[WS] Rejected - empty message or unauthenticated user")
                 return
 
             await self.save_message(user, self.room_id, message)
@@ -61,19 +81,28 @@ class ChatConsumer(AsyncWebsocketConsumer):
         except Exception as e:
             print(f"[WS ERROR] Send failed: {e}")
 
-    @database_sync_to_async
-    def save_message(self, user, room_id, content):
-        from .models import Conversation, Message
-        try:
-            conversation = Conversation.objects.get(room_id=room_id)
-            msg = Message.objects.create(
-                conversation=conversation,
-                user=user,
-                content=content
-            )
-            print(f"[WS] Saved message id={msg.id}")
-        except Conversation.DoesNotExist:
-            print(f"[WS ERROR] Conversation not found for room_id={room_id}")
-        except Exception as e:
-            print(f"[WS ERROR] Save failed: {e}")
-            traceback.print_exc()
+@database_sync_to_async
+def save_message(self, user, room_id, content):
+    from .models import Conversation, Message
+    try:
+        conversation = Conversation.objects.get(room_id=room_id)
+        msg = Message.objects.create(
+            conversation=conversation,
+            user=user,
+            content=content
+        )
+        print(f"[WS] Saved message id={msg.id}")
+    except Conversation.DoesNotExist:
+        print(f"[WS ERROR] Conversation not found for room_id={room_id}")
+    except Exception as e:
+        print(f"[WS ERROR] Save failed: {e}")
+        traceback.print_exc()
+
+
+@database_sync_to_async
+def user_in_conversation(self, user, room_id):
+    from .models import Conversation
+    return Conversation.objects.filter(
+        room_id=room_id,
+        participants=user
+    ).exists()
