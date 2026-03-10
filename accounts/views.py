@@ -2,12 +2,17 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 from .forms import (
     CustomUserCreationForm,
     CustomAuthenticationForm,
     TaskForm,
     ChannelForm,
+    UpdateProfileForm,
+    UpdateUserForm,
 )
 
 from .models import (
@@ -19,7 +24,6 @@ from .models import (
     StudyRoom,
 )
 
-
 def register_view(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
@@ -29,7 +33,6 @@ def register_view(request):
             return redirect("/accounts/dashboard/")
     else:
         form = CustomUserCreationForm()
-
     return render(request, "accounts/register.html", {"form": form})
 
 
@@ -42,7 +45,6 @@ def login_view(request):
             return redirect("/accounts/dashboard/")
     else:
         form = CustomAuthenticationForm()
-
     return render(request, "accounts/login.html", {"form": form})
 
 
@@ -52,34 +54,41 @@ def logout_view(request):
 
 
 @login_required
-def dashboard_view(request):
-    # Handle POST actions
-    if request.method == "POST":
+def messages_view(request):
+    """Messages page with empty state"""
+    return render(request, "accounts/messages.html", {
+        "direct_messages": [],  # Empty for now - ready for future DM feature
+    })
 
-        # Add Task
+
+@login_required
+def settings_view(request):
+    """Settings page with empty state"""
+    return render(request, "accounts/settings.html")
+
+
+@login_required
+def dashboard_view(request):
+    if request.method == "POST":
         if "add_task" in request.POST:
             form = TaskForm(request.POST)
-            channel_form = ChannelForm()  # keep other form available
+            channel_form = ChannelForm()
             if form.is_valid():
                 task = form.save(commit=False)
                 task.user = request.user
                 task.save()
                 return redirect("dashboard")
-
-        # Create Channel
         elif "create_channel" in request.POST:
             channel_form = ChannelForm(request.POST)
-            form = TaskForm()  # keep other form available
+            form = TaskForm()
             if channel_form.is_valid():
                 channel = channel_form.save()
                 channel.members.add(request.user)
                 return redirect("dashboard")
-
     else:
         form = TaskForm()
         channel_form = ChannelForm()
 
-    # Dashboard data
     tasks = Task.objects.filter(user=request.user, completed=False)[:5]
     channels = request.user.channels.all()[:5]
     pomodoro, _ = PomodoroSession.objects.get_or_create(user=request.user)
@@ -88,8 +97,6 @@ def dashboard_view(request):
         remind_at__gte=timezone.now()
     )[:5]
     activities = Activity.objects.filter(user=request.user)[:4]
-
-    # Ensure correct related_name for StudyRoom
     study_rooms = (
         request.user.study_rooms.all()[:4]
         if hasattr(request.user, "study_rooms")
@@ -110,3 +117,34 @@ def dashboard_view(request):
             "study_rooms": study_rooms,
         },
     )
+
+
+@login_required
+def people_view(request):
+    query = request.GET.get('q', '')
+    users = User.objects.exclude(id=request.user.id)
+    if query:
+        users = users.filter(username__icontains=query)
+    return render(request, "accounts/people.html", {"users": users, "query": query})
+
+
+@login_required
+def profile_view(request):
+    if request.method == 'POST':
+        if request.POST.get('form_type') == 'avatar':
+            profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+            user_form = UpdateUserForm(instance=request.user)
+            if profile_form.is_valid():
+                profile_form.save()
+                return redirect('profile')
+        else:
+            user_form = UpdateUserForm(request.POST, instance=request.user)
+            profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+            if user_form.is_valid() and profile_form.is_valid():
+                user_form.save()
+                profile_form.save()
+                return redirect('profile')
+    else:
+        user_form = UpdateUserForm(instance=request.user)
+        profile_form = UpdateProfileForm(instance=request.user.userprofile)
+    return render(request, 'accounts/profile.html', {'user_form': user_form, 'profile_form': profile_form})

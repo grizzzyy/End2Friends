@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "channels",     #  Django Channels (library)
     "groups",       #  Our model for channels
     'chat', # Add the (Chat App)
-    
+
 ]
 
 MIDDLEWARE = [

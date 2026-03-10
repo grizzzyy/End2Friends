@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Profile{% endblock %}
+
+{% block styles %}
+<style>
+    body {
+        background-color: #f9f5fe;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    textarea {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 12px;
+        width: 100%;
+    }
+
+    input[type="file"] {
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 8px 12px;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- main profile content -->
+<main class="flex-1 p-8">
+    <header class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-800">Profile Settings</h1>
+    </header>
+    <div class="flex flex-col gap-6">
+        <div class="bg-white rounded-xl shadow p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4">My Profile</h2>
+            <div class="space-y-3 px-4">
+                <!-- Profile Overview -->
+                <div class="bg-white shadow-sm border border-gray-300 rounded-xl p-4">
+                    <div class="flex gap-6 items-center">
+                        <div class="relative">
+                            <!-- Change Avatar Image -->
+                            {% if user.userprofile.avatar %}
+                            <img class="rounded-full w-24 h-24 object-cover" src="{{ user.userprofile.avatar.url }}"
+                                alt="Avatar">
+                            {% else %}
+                            <img class="rounded-full w-24 h-24 object-cover"
+                                src="{% static 'images/profile_images/default_avatar.png' %}" alt="Default Avatar">
+                            {% endif %}
+                            <div onclick="openAvatarModal()"
+                                class="absolute bottom-0 right-0 bg-white rounded-full p-1 px-1 shadow-sm border border-gray-300 cursor-pointer flex items-center justify-center">
+                                <span class="material-symbols-outlined" style="font-size: 16px;">photo_camera</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <h1 class="text-xl font-bold">{{ user.username }}</h1>
+                            <p class="text-sm">{{ user.userprofile.bio|default:"No bio yet." }}</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Profile Card -->
+                <div class="bg-white shadow-sm border border-gray-300 rounded-xl p-4">
+                    <div class="flex flex row justify-between">
+                        <h1 class="text-lg font-bold text-gray-800">Personal Information</h1>
+                        <button onclick="openEditModal()"
+                            class="pr-4 text-base bg-white shadow-sm border border-gray-300 rounded-full px-4 py-1 hover:bg-violet-100 transition-colors cursor-pointer">
+                            Edit
+                            <span class="material-symbols-outlined" style="font-size: 17px;">edit</span>
+                        </button>
+                    </div>
+                    <div class="space-y-3 px-4 pt-4">
+                        <div class="grid grid-cols-3">
+                            <h1 class="text-gray-600 font-semibold text-lg">Username</h1>
+                            <h1 class="text-gray-600 font-semibold text-lg">Email Address</h1>
+                            <h1 class="text-gray-600 font-semibold text-lg">Bio</h1>
+                        </div>
+                        <div class="grid grid-cols-3">
+                            <h1 class="text-black text-base">{{ user.username }}</h1>
+                            <h1 class="text-black text-base">{{ user.email }}</h1>
+                            <h1 class="text-black text-base">{{ user.userprofile.bio|default:"No bio yet." }}
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- Edit Profile Modal -->
+    <div id="edit-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-2xl">
+
+            <!-- Modal header -->
+            <div class="flex items-center justify-between border-b border-gray-200 pb-4">
+                <h3 class="text-lg font-medium text-gray-800">Edit Profile</h3>
+                <button onclick="closeEditModal()"
+                    class="text-gray-500 hover:bg-violet-100 rounded-lg w-9 h-9 inline-flex justify-center items-center">
+                    <!-- Close icon from: https://heroicons.com/ -->
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal body-->
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="edit_profile">
+                <div class="space-y-4 py-4">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm font-medium text-gray-700">Username</label>
+                        {{ user_form.username.as_widget }}
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm font-medium text-gray-700">Email</label>
+                        {{ user_form.email }}
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-sm font-medium text-gray-700">Bio</label>
+                        {{ profile_form.bio }}
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="flex gap-4 border-t border-gray-200 pt-4">
+                    <button type="submit"
+                        class="bg-white shadow-sm border border-gray-300 rounded-full px-4 py-2 hover:bg-violet-100 transition-colors text-sm font-medium">
+                        Save Changes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Change Avatar Modal -->
+    <div id="avatar-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md">
+
+            <!-- Modal header -->
+            <div class="flex items-center justify-between border-b border-gray-200 pb-4">
+                <h3 class="text-lg font-medium text-gray-800">Change Profile Picture</h3>
+                <button onclick="closeAvatarModal()"
+                    class="text-gray-500 hover:bg-violet-100 rounded-lg w-9 h-9 inline-flex justify-center items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                        stroke="currentColor" class="size-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal body -->
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="avatar">
+                <div class="py-4 flex flex-col gap-4">
+                    <!-- preview of current avatar -->
+                    <div class="flex justify-center">
+                        {% if user.userprofile.avatar %}
+                        <img class="rounded-full w-24 h-24 object-cover" src="{{ user.userprofile.avatar.url }}"
+                            alt="Avatar">
+                        {% else %}
+                        <img class="rounded-full w-24 h-24 object-cover"
+                            src="{% static 'images/profile_images/default_avatar.png' %}" alt="Default Avatar">
+                        {% endif %}
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <div class="flex items-center gap-3">
+                            <label for="{{ profile_form.avatar.id_for_label }}"
+                                class="border border-gray-300 rounded-full px-4 py-2 text-sm cursor-pointer hover:bg-gray-100 transition-colors">
+                                Choose File
+                            </label>
+                            <span id="file-name" class="text-sm text-gray-500">No file chosen</span>
+                            {{ profile_form.avatar }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="flex gap-4 border-t border-gray-200 pt-4">
+                    <button type="submit"
+                        class="bg-white shadow-sm border border-gray-300 rounded-full px-4 py-2 hover:bg-violet-100 transition-colors text-sm font-medium">
+                        Save
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</main>
+
+<!-- Javascript for Modal Windows -->
+<script>
+    function openEditModal() {
+        document.getElementById('edit-modal').classList.remove('hidden')
+    }
+
+    function closeEditModal() {
+        document.getElementById('edit-modal').classList.add('hidden')
+    }
+
+    function openAvatarModal() {
+        document.getElementById('avatar-modal').classList.remove('hidden')
+    }
+
+    function closeAvatarModal() {
+        document.getElementById('avatar-modal').classList.add('hidden')
+    }
+
+    // Hide default input for choosing file 
+    document.querySelector('input[type="file"]').classList.add('hidden')
+
+    document.querySelector('input[type="file"]').addEventListener('change', function () {
+        const fileName = this.files[0] ? this.files[0].name : 'No file chosen'
+        document.getElementById('file-name').textContent = fileName
+    })
+
+</script>
+{% endblock %}
