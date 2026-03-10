@@ -59,6 +59,18 @@ class Task(models.Model):
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Add the link to the message that was flagged to create this task
+    source_message = models.ForeignKey(
+        'chat.Message',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='tasks'
+       )
+    
+    # Add a description field for more detail
+    description = models.TextField(blank=True)
+    # updated time stamp
+    updated_at = models.DateTimeField(blank=True)
     class Meta:
         ordering = ['due_date', '-priority']
 
@@ -113,7 +125,12 @@ class Reminder(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reminders')
     title = models.CharField(max_length=200)
     remind_at = models.DateTimeField()
-    channel = models.CharField(max_length=100, blank=True, default='#general')
+    # Change channel from CharField to ForeignKey
+    channel = models.ForeignKey(
+        'chat.Channel',
+        on_delete=models.SET_NULL,
+        null=True, blank=True
+        )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
