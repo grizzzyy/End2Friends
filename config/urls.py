@@ -27,9 +27,7 @@ urlpatterns = [
     path("chat/", include("chat.urls")), # for the chat app
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# Serve uploaded media files during development.
-# Django doesn't handle this automatically
-
+# Serve uploaded media files during development
 from django.conf import settings
 from django.conf.urls.static import static
 
