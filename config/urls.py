@@ -25,6 +25,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('', include('core.urls')), # for dashboard
     path("chat/", include("chat.urls")), # for the chat app
+    path('rooms/', include('rooms.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # Serve uploaded media files during development
