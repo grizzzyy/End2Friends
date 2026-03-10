@@ -59,6 +59,18 @@ class Task(models.Model):
     completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # Add the link to the message that was flagged to create this task
+    source_message = models.ForeignKey(
+        'chat.Message',
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='tasks'
+       )
+    
+    # Add a description field for more detail
+    description = models.TextField(blank=True)
+    # updated time stamp
+    updated_at = models.DateTimeField(blank=True)
     class Meta:
         ordering = ['due_date', '-priority']
 
