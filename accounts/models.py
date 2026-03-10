@@ -127,7 +127,7 @@ class Reminder(models.Model):
     remind_at = models.DateTimeField()
     # Change channel from CharField to ForeignKey
     channel = models.ForeignKey(
-        'chat.Channel',
+        'accounts.Channel',
         on_delete=models.SET_NULL,
         null=True, blank=True
         )
