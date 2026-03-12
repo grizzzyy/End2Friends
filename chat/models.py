@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth import get_user_model
 import shortuuid
 import os
+import uuid
+from .validators import validate_uploaded_file
 
 User = get_user_model()
 
@@ -9,10 +11,13 @@ User = get_user_model()
 class Conversation(models.Model):
     # a name for the conversation
     name = models.CharField(max_length=255, blank=True, null=True)
+
     # unique room identifier
     room_id = models.CharField(max_length=50, unique=True, blank=True)
+
     # whether this is a private dm
     is_private = models.BooleanField(default=False)
+
     # user who created or manages the conversation
     admin = models.ForeignKey(
         User,
@@ -21,12 +26,14 @@ class Conversation(models.Model):
         blank=True,
         related_name='administered_conversations'
     )
+
     # users who are part of the conversation
     participants = models.ManyToManyField(
         User,
         related_name='conversations',
         blank=True
     )
+
     # users currently online in this conversation
     users_online = models.ManyToManyField(
         User,
@@ -45,6 +52,11 @@ class Conversation(models.Model):
         return self.name or f"DM({self.room_id})"
 
 
+def upload_to_uuid(instance, filename):
+    ext = os.path.splitext(filename)[1].lower()
+    return f'chat_files/{uuid.uuid4()}{ext}'
+
+
 # represents a single message inside a conversation
 class Message(models.Model):
     # the conversation this message belongs to
@@ -53,12 +65,22 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         related_name="messages"
     )
+
     # the user who sent the message
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    # optional file attachment
-    file = models.FileField(upload_to='chat_files/', blank=True, null=True)
+
+    file = models.FileField(
+        upload_to=upload_to_uuid,
+        blank=True,
+        null=True,
+        validators=[validate_uploaded_file]
+    )
+
+    original_filename = models.CharField(max_length=255, blank=True)
+
     # text content of the message
     content = models.TextField(blank=True)
+
     # when the message was created
     timestamp = models.DateTimeField(auto_now_add=True)
 
