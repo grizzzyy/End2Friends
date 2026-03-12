@@ -1,6 +1,11 @@
+import uuid
 from django.db import models
 from django.conf import settings
 
+
+def generate_code():
+    # Generates an 8‑character unique invite code
+    return uuid.uuid4().hex[:8]
 
 
 class StudyRoom(models.Model):
@@ -12,26 +17,29 @@ class StudyRoom(models.Model):
 
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    room_type = models.CharField(
-        max_length=10,
-        choices=ROOM_TYPE
-    )
+    room_type = models.CharField(max_length=10, choices=ROOM_TYPE)
     is_private = models.BooleanField(default=False)
+
     created_by = models.ForeignKey(
-    settings.AUTH_USER_MODEL,
-    on_delete=models.CASCADE,
-    related_name="study_rooms"
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="study_rooms"
     )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
-    invite_code = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    # Auto‑generated invite code
+    invite_code = models.CharField(
+        max_length=20,
+        unique=True,
+        null=True,
+        blank=True,
+        default=generate_code
+    )
 
+    def __str__(self):
+        return self.name
 
-    
-    def save(self, *args, **kwargs):
-        if not self.invite_code:
-            self.invite_code = secrets.token_urlsafe(6)
-        super().save(*args, **kwargs)
 
 class RoomMembership(models.Model):
     ROLE_CHOICES = [
@@ -41,25 +49,28 @@ class RoomMembership(models.Model):
     ]
 
     user = models.ForeignKey(
-    settings.AUTH_USER_MODEL,
-    on_delete=models.CASCADE,
-    related_name="room_memberships"
-)
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="room_memberships"
+    )
 
     room = models.ForeignKey(
         "StudyRoom",
         on_delete=models.CASCADE,
         related_name="memberships"
     )
+
     role = models.CharField(
         max_length=10,
         choices=ROLE_CHOICES,
         default="member"
     )
+
     joined_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user} in {self.room} ({self.role})"
+
 
 class RoomInvite(models.Model):
     room = models.ForeignKey(
@@ -67,17 +78,18 @@ class RoomInvite(models.Model):
         on_delete=models.CASCADE,
         related_name="invites"
     )
+
     invited_user = models.ForeignKey(
-    settings.AUTH_USER_MODEL,
-    on_delete=models.CASCADE,
-    related_name="room_invites"
-)
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="room_invites"
+    )
 
     invited_by = models.ForeignKey(
-    settings.AUTH_USER_MODEL,
-    on_delete=models.CASCADE,
-    related_name="sent_room_invites"
-)
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="sent_room_invites"
+    )
 
     accepted = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
