@@ -1,9 +1,42 @@
-<h1>{{ room.name }}</h1>
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="flex w-full">
+    <div class="w-56 bg-violet-200/50 rounded-t-lg flex flex-col ">
+        <div class="p-4 flex justify-between border-b border-gray-400">
+            <h1 class="text-bold text-xl">{{ room.name }}</h1>
+            <span class="material-symbols-outlined">person_add</span>
+        </div>
+        <div class="p-4 flex border-b border-gray-400">
+            <span class="material-symbols-outlined">manage_search</span>
+            <h1 class="text-md">Browse Channels</h1>
+        </div>
+        {% for channel in channels %}
+        {% empty %}
+        <div>
+            <h1 class="p-4 text-center text-gray-500 text-sm">No channels created yet.</h1>
+        </div>
+        {% endfor %}
+    </div>
+    <div class="flex-1">
+        {% for channel in channels %}
+        {% empty %}
+        <div class="h-full flex flex-col justify-center items-center ">
+            <h1 class="text-bold text-4xl">Welcome to {{ room.name }}</h1>
+            <h1 class="pt-2 text-gray-600">This is your brand new {{ room.get_room_type_display }} Room. Below are
+                some suggestions to help get you started.</h1>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
-<div id="messages" style="border:1px solid #ccc; height:300px; overflow-y:auto;"></div>
+
+<!-- <div id="messages" style="border:1px solid #ccc; height:300px; overflow-y:auto;"></div>
 
 <input id="messageInput" type="text" placeholder="Type a message...">
-<button id="sendBtn">Send</button>
+<button id="sendBtn">Send</button> -->
+
+
 
 <script>
     const roomId = "{{ room.id }}";
@@ -11,13 +44,13 @@
         "ws://" + window.location.host + "/ws/chat/room/" + roomId + "/"
     );
 
-    socket.onmessage = function(e) {
+    socket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         const messagesDiv = document.getElementById("messages");
         messagesDiv.innerHTML += "<p><strong>" + data.user + ":</strong> " + data.message + "</p>";
     };
 
-    document.getElementById("sendBtn").onclick = function() {
+    document.getElementById("sendBtn").onclick = function () {
         const input = document.getElementById("messageInput");
         socket.send(JSON.stringify({
             "message": input.value
@@ -25,3 +58,5 @@
         input.value = "";
     };
 </script>
+
+{% endblock %}
