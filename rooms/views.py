@@ -24,42 +24,49 @@ def create_room(request):
         name = request.POST.get('name')
         room_type = request.POST.get('room_type', 'study')
         is_private = request.POST.get('is_private') == 'on'
+
         room = StudyRoom.objects.create(
             name=name,
             room_type=room_type,
             is_private=is_private,
             created_by=request.user
         )
+
         RoomMembership.objects.create(
             user=request.user, room=room, role='owner'
         )
-        return redirect('room_chat', room_id=room.id)
+
+        return redirect('rooms:room_chat', room_id=room.id)
+
     return render(request, 'rooms/create_room.html')
 
 
 @login_required
 def join_room(request, room_id):
     room = get_object_or_404(StudyRoom, id=room_id)
+
     if not room.is_private:
         RoomMembership.objects.get_or_create(
             user=request.user, room=room,
             defaults={'role': 'member'}
         )
-    return redirect('room_chat', room_id=room.id)
+
+    return redirect('rooms:room_chat', room_id=room.id)
 
 
 @login_required
 def send_invite(request, room_id):
     if request.method != 'POST':
-        return redirect('room_list')
+        return redirect('rooms:room_list')
 
     room = get_object_or_404(StudyRoom, id=room_id)
 
     is_member = RoomMembership.objects.filter(
         user=request.user, room=room
     ).exists()
+
     if not is_member:
-        return redirect('room_list')
+        return redirect('rooms:room_list')
 
     username = request.POST.get('username')
     invited_user = get_object_or_404(User, username=username)
@@ -67,21 +74,24 @@ def send_invite(request, room_id):
     already_member = RoomMembership.objects.filter(
         user=invited_user, room=room
     ).exists()
+
     if already_member:
-        return redirect('room_chat', room_id=room.id)
+        return redirect('rooms:room_chat', room_id=room.id)
 
     already_invited = RoomInvite.objects.filter(
         invited_user=invited_user, room=room, accepted=False
     ).exists()
+
     if already_invited:
-        return redirect('room_chat', room_id=room.id)
+        return redirect('rooms:room_chat', room_id=room.id)
 
     RoomInvite.objects.create(
         room=room,
         invited_user=invited_user,
         invited_by=request.user
     )
-    return redirect('room_chat', room_id=room.id)
+
+    return redirect('rooms:room_chat', room_id=room.id)
 
 
 @login_required
@@ -89,6 +99,7 @@ def accept_invite(request, invite_id):
     invite = get_object_or_404(
         RoomInvite, id=invite_id, invited_user=request.user
     )
+
     invite.accepted = True
     invite.save()
 
@@ -97,7 +108,8 @@ def accept_invite(request, invite_id):
         room=invite.room,
         defaults={'role': 'member'}
     )
-    return redirect('room_chat', room_id=invite.room.id)
+
+    return redirect('rooms:room_chat', room_id=invite.room.id)
 
 
 @login_required
@@ -105,6 +117,7 @@ def decline_invite(request, invite_id):
     invite = get_object_or_404(
         RoomInvite, id=invite_id, invited_user=request.user
     )
+
     invite.delete()
     return redirect('dashboard')
 
@@ -115,11 +128,14 @@ def my_invites(request):
         invited_user=request.user,
         accepted=False
     ).select_related('room', 'invited_by')
+
     return render(request, 'rooms/invites.html', {'invites': invites})
+
 
 @login_required
 def room_detail(request, room_id):
     room = get_object_or_404(StudyRoom, id=room_id)
+
     membership = RoomMembership.objects.filter(
         user=request.user, room=room
     ).first()
@@ -129,18 +145,22 @@ def room_detail(request, room_id):
         "membership": membership,
     })
 
-    
+
 @login_required
 def room_chat(request, room_id):
     room = get_object_or_404(StudyRoom, id=room_id)
+
     membership = RoomMembership.objects.filter(
         user=request.user, room=room
     ).first()
+
     if not membership and room.is_private:
-        return redirect('room_list')
+        return redirect('rooms:room_list')
+
     members = RoomMembership.objects.filter(
         room=room
     ).select_related('user')
+
     return render(request, 'rooms/chat.html', {
         'room': room,
         'members': members,
