@@ -166,3 +166,17 @@ def room_chat(request, room_id):
         'members': members,
         'membership': membership,
     })
+
+    
+    
+@login_required
+def join_by_code(request, code):
+    room = get_object_or_404(StudyRoom, invite_code=code)
+
+    RoomMembership.objects.get_or_create(
+        user=request.user,
+        room=room,
+        defaults={'role': 'member'}
+    )
+
+    return redirect('rooms:room_chat', room_id=room.id)
