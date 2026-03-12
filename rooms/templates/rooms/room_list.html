@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rooms</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background: #f7f7f7;
+        }
+        h1 {
+            margin-bottom: 1rem;
+        }
+        .room-list {
+            list-style: none;
+            padding: 0;
+        }
+        .room-list li {
+            background: white;
+            padding: 1rem;
+            margin-bottom: .5rem;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+        .room-list a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+        .room-list a:hover {
+            text-decoration: underline;
+        }
+        .empty {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Available Rooms</h1>
+
+    {% if rooms %}
+        <ul class="room-list">
+            {% for room in rooms %}
+                <li>
+                    <a href="{% url 'rooms:room_detail' room.id %}">
+                        {{ room.name }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="empty">No rooms available yet.</p>
+    {% endif %}
+
+</body>
+</html>

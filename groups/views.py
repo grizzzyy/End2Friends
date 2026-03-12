@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django import forms
 
-from .models import StudyChannel, Membership
+from .models import StudyChannel
 
 
 class StudyChannelForm(forms.ModelForm):
@@ -10,27 +10,31 @@ class StudyChannelForm(forms.ModelForm):
         model = StudyChannel
         fields = ["name", "description", "is_private"]
 
-
 @login_required
-def create_channel(request):
-    if request.method == "POST":
+def create_channel(request, room_id):
+    from rooms.models import StudyRoom, RoomMembership
+    room = get_object_or_404(StudyRoom, id=room_id)
+
+    is_member = RoomMembership.objects.filter(
+        user=request.user, room=room
+    ).exists()
+    if not is_member:
+        return redirect('room_list')
+
+    if request.method == 'POST':
         form = StudyChannelForm(request.POST)
         if form.is_valid():
             channel = form.save(commit=False)
             channel.creator = request.user
+            channel.room = room
             channel.save()
-
-            Membership.objects.create(
-                user=request.user,
-                channel=channel,
-                role="owner"
-            )
-            return redirect("list_channels")
+            return redirect('room_chat', room_id=room.id)
     else:
         form = StudyChannelForm()
-
-    return render(request, "groups/create_channel.html", {"form": form})
-
+    return render(request, 'groups/create_channel.html', {
+        'form': form,
+        'room': room
+    })
 
 @login_required
 def join_channel(request, channel_id):
