@@ -117,7 +117,19 @@ def my_invites(request):
     ).select_related('room', 'invited_by')
     return render(request, 'rooms/invites.html', {'invites': invites})
 
+@login_required
+def room_detail(request, room_id):
+    room = get_object_or_404(StudyRoom, id=room_id)
+    membership = RoomMembership.objects.filter(
+        user=request.user, room=room
+    ).first()
 
+    return render(request, "rooms/room_detail.html", {
+        "room": room,
+        "membership": membership,
+    })
+
+    
 @login_required
 def room_chat(request, room_id):
     room = get_object_or_404(StudyRoom, id=room_id)
