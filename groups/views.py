@@ -1,66 +1,136 @@
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect, get_object_or_404
-from django import forms
+from django.contrib.auth import get_user_model
+from .models import StudyRoom, RoomMembership, RoomInvite
 
-from .models import StudyChannel, Membership
-
-
-class StudyChannelForm(forms.ModelForm):
-    class Meta:
-        model = StudyChannel
-        fields = ["name", "description", "is_private"]
+User = get_user_model()
 
 
 @login_required
-def create_channel(request):
-    if request.method == "POST":
-        form = StudyChannelForm(request.POST)
-        if form.is_valid():
-            channel = form.save(commit=False)
-            channel.creator = request.user
-            channel.save()
-
-            Membership.objects.create(
-                user=request.user,
-                channel=channel,
-                role="owner"
-            )
-            return redirect("list_channels")
-    else:
-        form = StudyChannelForm()
-
-    return render(request, "groups/create_channel.html", {"form": form})
+def room_list(request):
+    my_rooms = StudyRoom.objects.filter(memberships__user=request.user)
+    public_rooms = StudyRoom.objects.filter(
+        is_private=False
+    ).exclude(memberships__user=request.user)
+    return render(request, 'rooms/room_list.html', {
+        'my_rooms': my_rooms,
+        'public_rooms': public_rooms,
+    })
 
 
 @login_required
-def join_channel(request, channel_id):
-    channel = get_object_or_404(StudyChannel, id=channel_id)
+def create_room(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        room_type = request.POST.get('room_type', 'study')
+        is_private = request.POST.get('is_private') == 'on'
+        room = StudyRoom.objects.create(
+            name=name,
+            room_type=room_type,
+            is_private=is_private,
+            created_by=request.user
+        )
+        RoomMembership.objects.create(
+            user=request.user, room=room, role='owner'
+        )
+        return redirect('room_chat', room_id=room.id)
+    return render(request, 'rooms/create_room.html')
 
-    Membership.objects.get_or_create(
-        user=request.user,
-        channel=channel,
-        defaults={"role": "member"}
+
+@login_required
+def join_room(request, room_id):
+    room = get_object_or_404(StudyRoom, id=room_id)
+    if not room.is_private:
+        RoomMembership.objects.get_or_create(
+            user=request.user, room=room,
+            defaults={'role': 'member'}
+        )
+    return redirect('room_chat', room_id=room.id)
+
+
+@login_required
+def send_invite(request, room_id):
+    if request.method != 'POST':
+        return redirect('room_list')
+
+    room = get_object_or_404(StudyRoom, id=room_id)
+
+    is_member = RoomMembership.objects.filter(
+        user=request.user, room=room
+    ).exists()
+    if not is_member:
+        return redirect('room_list')
+
+    username = request.POST.get('username')
+    invited_user = get_object_or_404(User, username=username)
+
+    already_member = RoomMembership.objects.filter(
+        user=invited_user, room=room
+    ).exists()
+    if already_member:
+        return redirect('room_chat', room_id=room.id)
+
+    already_invited = RoomInvite.objects.filter(
+        invited_user=invited_user, room=room, accepted=False
+    ).exists()
+    if already_invited:
+        return redirect('room_chat', room_id=room.id)
+
+    RoomInvite.objects.create(
+        room=room,
+        invited_user=invited_user,
+        invited_by=request.user
     )
-
-    return redirect("list_channels")
+    return redirect('room_chat', room_id=room.id)
 
 
 @login_required
-def leave_channel(request, channel_id):
-    channel = get_object_or_404(StudyChannel, id=channel_id)
+def accept_invite(request, invite_id):
+    invite = get_object_or_404(
+        RoomInvite, id=invite_id, invited_user=request.user
+    )
+    invite.accepted = True
+    invite.save()
 
-    Membership.objects.filter(
+    RoomMembership.objects.get_or_create(
         user=request.user,
-        channel=channel
-    ).delete()
-
-    return redirect("list_channels")
+        room=invite.room,
+        defaults={'role': 'member'}
+    )
+    return redirect('room_chat', room_id=invite.room.id)
 
 
 @login_required
-def list_channels(request):
-    channels = StudyChannel.objects.filter(
-        memberships__user=request.user
-    ).distinct()
+def decline_invite(request, invite_id):
+    invite = get_object_or_404(
+        RoomInvite, id=invite_id, invited_user=request.user
+    )
+    invite.delete()
+    return redirect('dashboard')
 
-    return render(request, "groups/list_channels.html", {"channels": channels})
+
+@login_required
+def my_invites(request):
+    invites = RoomInvite.objects.filter(
+        invited_user=request.user,
+        accepted=False
+    ).select_related('room', 'invited_by')
+    return render(request, 'rooms/invites.html', {'invites': invites})
+
+
+@login_required
+def room_chat(request, room_id):
+    room = get_object_or_404(StudyRoom, id=room_id)
+    membership = RoomMembership.objects.filter(
+        user=request.user, room=room
+    ).first()
+    if not membership and room.is_private:
+        return redirect('room_list')
+    members = RoomMembership.objects.filter(
+        room=room
+    ).select_related('user')
+    return render(request, 'rooms/chat.html', {
+        'room': room,
+        'members': members,
+        'membership': membership,
+    })
