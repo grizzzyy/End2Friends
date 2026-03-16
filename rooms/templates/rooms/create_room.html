@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Room</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background: #f7f7f7;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            max-width: 600px;
+            margin: auto;
+        }
+        h1 {
+            margin-top: 0;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        input[type="text"],
+        textarea {
+            padding: .75rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+            width: 100%;
+        }
+        button {
+            padding: .75rem;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        a.back {
+            display: inline-block;
+            margin-top: 1.5rem;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a.back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Create a New Room</h1>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label for="id_name">Room Name</label>
+        <input type="text" name="name" id="id_name" required>
+
+        <label for="id_description">Description (optional)</label>
+        <textarea name="description" id="id_description" rows="4"></textarea>
+
+        <button type="submit">Create Room</button>
+    </form>
+
+    <a href="{% url 'rooms:room_list' %}" class="back">← Back to Rooms</a>
+</div>
+
+</body>
+</html>

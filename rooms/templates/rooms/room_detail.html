@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ room.name }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background: #f7f7f7;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            max-width: 600px;
+            margin: auto;
+        }
+        h1 {
+            margin-top: 0;
+        }
+        .meta {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        a.back {
+            display: inline-block;
+            margin-top: 1.5rem;
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a.back:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>{{ room.name }}</h1>
+
+    <p class="meta">
+        Room ID: {{ room.id }}
+        
+    </p>
+
+    <p>Invite Code: {{ room.invite_code }}</p>
+
+    {% if room.description %}
+        <p>{{ room.description }}</p>
+    {% else %}
+        <p><em>No description provided for this room.</em></p>
+    {% endif %}
+
+    <a href="{% url 'rooms:room_list' %}" class="back">← Back to Rooms</a>
+</div>
+
+</body>
+</html>
