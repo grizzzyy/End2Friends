@@ -103,14 +103,11 @@
             {% endfor %}
         </ul>
 
-        <!-- Create a room (static) -->
-        <form method="POST" class="flex gap-2 mt-4">
-            {% csrf_token %}
-            <button type="submit" name="create_channel"
-                class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
-                + Create A Room
-            </button>
-        </form>
+        <!-- Create a room link -->
+        <a href="{% url 'rooms:create_room' %}"
+            class="inline-block px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 mt-4">
+            + Create A Room
+        </a>
     </div>
 
     <!-- Pomodoro Status Card -->
