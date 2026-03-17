@@ -3,15 +3,16 @@ from channels.db import database_sync_to_async
 import json
 import traceback
 
+
 class ChatConsumer(AsyncWebsocketConsumer):
 
     async def connect(self):
         try:
-            self.room_id = self.scope['url_route']['kwargs']['room_name']
-            self.room_group_name = f'chat_{self.room_id}'
+            self.room_id = self.scope["url_route"]["kwargs"]["room_name"]
+            self.room_group_name = f"chat_{self.room_id}"
 
             # AUTH GUARD — reject unauthenticated users immediately
-            user = self.scope['user']
+            user = self.scope["user"]
             if not user.is_authenticated:
                 await self.close()
                 return
@@ -22,16 +23,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.close()
                 return
 
-            await self.channel_layer.group_add(
-                self.room_group_name,
-                self.channel_name
-            )
+            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
 
             await self.accept()
-            print(f'[WS] Connected: {self.room_id} | User: {user}')
+            print(f"[WS] Connected: {self.room_id} | User: {user}")
 
         except Exception as e:
-            print(f'[WS ERROR] Connect failed: {e}')
+            print(f"[WS ERROR] Connect failed: {e}")
             traceback.print_exc()
             await self.close()
 
@@ -39,8 +37,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         print(f"[WS] Disconnected: code={close_code}")
         try:
             await self.channel_layer.group_discard(
-                self.room_group_name,
-                self.channel_name
+                self.room_group_name, self.channel_name
             )
         except Exception as e:
             print(f"[WS ERROR] Disconnect error: {e}")
@@ -48,8 +45,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         try:
             data = json.loads(text_data)
-            message = data.get('message', '').strip()
-            user = self.scope['user']
+            message = data.get("message", "").strip()
+            user = self.scope["user"]
 
             print(f"[WS] Message from {user}: {message}")
 
@@ -62,10 +59,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
-                    'type': 'chat_message',
-                    'message': message,
-                    'username': user.username,
-                }
+                    "type": "chat_message",
+                    "message": message,
+                    "username": user.username,
+                },
             )
 
         except Exception as e:
@@ -74,35 +71,37 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def chat_message(self, event):
         try:
-            await self.send(text_data=json.dumps({
-                'message': event['message'],
-                'username': event['username'],
-            }))
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "message": event["message"],
+                        "username": event["username"],
+                    }
+                )
+            )
         except Exception as e:
             print(f"[WS ERROR] Send failed: {e}")
 
-@database_sync_to_async
-def save_message(self, user, room_id, content):
-    from .models import Conversation, Message
-    try:
-        conversation = Conversation.objects.get(room_id=room_id)
-        msg = Message.objects.create(
-            conversation=conversation,
-            user=user,
-            content=content
-        )
-        print(f"[WS] Saved message id={msg.id}")
-    except Conversation.DoesNotExist:
-        print(f"[WS ERROR] Conversation not found for room_id={room_id}")
-    except Exception as e:
-        print(f"[WS ERROR] Save failed: {e}")
-        traceback.print_exc()
+
+    @database_sync_to_async
+    def save_message(self, user, room_id, content):
+        from .models import Conversation, Message
+
+        try:
+            conversation = Conversation.objects.get(room_id=room_id)
+            msg = Message.objects.create(
+                conversation=conversation, user=user, content=content
+            )
+            print(f"[WS] Saved message id={msg.id}")
+        except Conversation.DoesNotExist:
+            print(f"[WS ERROR] Conversation not found for room_id={room_id}")
+        except Exception as e:
+            print(f"[WS ERROR] Save failed: {e}")
+            traceback.print_exc()
 
 
-@database_sync_to_async
-def user_in_conversation(self, user, room_id):
-    from .models import Conversation
-    return Conversation.objects.filter(
-        room_id=room_id,
-        participants=user
-    ).exists()
+    @database_sync_to_async
+    def user_in_conversation(self, user, room_id):
+        from .models import Conversation
+
+        return Conversation.objects.filter(room_id=room_id, participants=user).exists()
