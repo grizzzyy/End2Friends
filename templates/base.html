@@ -33,6 +33,7 @@
             color: #6b7280;
             text-decoration: none;
             margin-bottom: 4px;
+            position: relative;
         }
 
         .nav-link:hover {
@@ -44,6 +45,65 @@
             background: #ede9fe;
             color: #7c3aed;
         }
+
+        .nav-link .tooltip {
+            position: absolute;
+            left: 56px;
+            background: #35264d;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 6px;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            z-index: 100;
+        }
+
+        aside {
+            width: 224px;
+            transition: width 0.25s ease;
+            overflow: visible;
+            position: relative;
+        }
+
+        aside.collapsed {
+            width: 74px;
+        }
+
+        aside.collapsed .nav-text {
+            opacity: 0;
+            width: 0;
+            pointer-events: none;
+        }
+
+        aside.collapsed .nav-link:hover .tooltip {
+            opacity: 1;
+        }
+
+        #sidebar-toggle {
+            position: absolute;
+            top: 20px;
+            right: -14px;
+            z-index: 50;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: white;
+            border: 1.5px solid #e9d5ff;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #7c3aed;
+        }
+
+        #sidebar-toggle:hover {
+            background: #f3e8ff;
+        }
+
+        aside.collapsed #sidebar-toggle {
+            transform: rotate(180deg);
+        }
     </style>
     {% block styles %}
     {% endblock %}
@@ -51,52 +111,66 @@
 
 <body class="varela-round-regular">
     <div class="flex min-h-screen bg-purple-50">
+
         <!-- Sidebar -->
-        <aside class="w-56 bg-white shadow-md flex flex-col">
+        <aside id="sidebar" class="bg-white shadow-md flex flex-col">
+
+            <!-- Toggle button -->
+            <button id="sidebar-toggle">
+                <span class="material-symbols-outlined">chevron_left</span>
+            </button>
+
             <!-- Logo -->
-            <div class="p-5 flex items-center gap-2 text-purple-600 border-b border-purple-100">
-                <span class="material-symbols-outlined">drone_2</span>
-                <h1 class="font-bold text-lg">End2Friend</h1>
+            <div class="p-4 flex items-center gap-2 text-purple-600 border-b border-purple-100"
+                style="min-height:64px;">
+                <span class="material-symbols-outlined flex-shrink-0">drone_2</span>
+                <h1 class="font-bold text-lg nav-text">End2Friend</h1>
             </div>
 
             <!-- User -->
-            <div class="p-5 flex items-center gap-3 border-b border-purple-100">
-                <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center">
+            <div class="p-4 flex items-center gap-3 border-b border-purple-100">
+                <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
                     <span class="material-symbols-outlined text-purple-600">person</span>
                 </div>
-                <span class="text-gray-700 text-sm">{{ user.username }}</span>
+                <span class="text-gray-700 text-sm nav-text">{{ user.username }}</span>
             </div>
 
             <!-- Nav Links -->
-            <nav class="flex-1 p-4">
+            <nav class="flex-1 p-3">
                 <a href="{% url 'dashboard' %}"
                     class="nav-link {% if '/dashboard/' in request.path %}active{% endif %}">
-                    <span class="material-symbols-outlined">dashboard</span>
-                    Dashboard
+                    <span class="material-symbols-outlined flex-shrink-0">dashboard</span>
+                    <span class="nav-text">Dashboard</span>
+                    <span class="tooltip">Dashboard</span>
                 </a>
                 <a href="#" class="nav-link">
-                    <span class="material-symbols-outlined">chat</span>
-                    Messages
+                    <span class="material-symbols-outlined flex-shrink-0">chat</span>
+                    <span class="nav-text">Messages</span>
+                    <span class="tooltip">Messages</span>
                 </a>
                 <a href="{% url 'profile' %}" class="nav-link {% if '/profile/' in request.path %}active{% endif %}">
-                    <span class="material-symbols-outlined">person</span>
-                    Profile
+                    <span class="material-symbols-outlined flex-shrink-0">person</span>
+                    <span class="nav-text">Profile</span>
+                    <span class="tooltip">Profile</span>
                 </a>
-                <a href="{% url 'people' %}" class="nav-link">
-                    <span class="material-symbols-outlined">person_search</span>
-                    People
+                <a href="{% url 'people' %}" class="nav-link {% if '/people/' in request.path %}active{% endif %}">
+                    <span class="material-symbols-outlined flex-shrink-0">person_search</span>
+                    <span class="nav-text">People</span>
+                    <span class="tooltip">People</span>
                 </a>
                 <a href="#" class="nav-link">
-                    <span class="material-symbols-outlined">settings</span>
-                    Settings
+                    <span class="material-symbols-outlined flex-shrink-0">settings</span>
+                    <span class="nav-text">Settings</span>
+                    <span class="tooltip">Settings</span>
                 </a>
             </nav>
 
             <!-- Logout -->
             <div class="p-4 border-t border-purple-100">
                 <a href="{% url 'logout' %}" class="nav-link text-red-400 hover:bg-red-50">
-                    <span class="material-symbols-outlined">logout</span>
-                    Log out
+                    <span class="material-symbols-outlined flex-shrink-0">logout</span>
+                    <span class="nav-text">Log out</span>
+                    <span class="tooltip">Log out</span>
                 </a>
             </div>
         </aside>
@@ -105,6 +179,21 @@
         {% endblock %}
 
     </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const toggle = document.getElementById('sidebar-toggle');
+        const KEY = 'sidebar_collapsed';
+
+        if (localStorage.getItem(KEY) === 'true') {
+            sidebar.classList.add('collapsed');
+        }
+
+        toggle.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem(KEY, sidebar.classList.contains('collapsed'));
+        });
+    </script>
 </body>
 
 </html>
