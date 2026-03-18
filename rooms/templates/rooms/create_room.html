@@ -1,81 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Create Room</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 2rem;
-            background: #f7f7f7;
-        }
-        .container {
-            background: white;
-            padding: 2rem;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            max-width: 600px;
-            margin: auto;
-        }
-        h1 {
-            margin-top: 0;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        input[type="text"],
-        textarea {
-            padding: .75rem;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 1rem;
-            width: 100%;
-        }
-        button {
-            padding: .75rem;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            cursor: pointer;
-        }
-        button:hover {
-            background: #0056b3;
-        }
-        a.back {
-            display: inline-block;
-            margin-top: 1.5rem;
-            color: #007bff;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        a.back:hover {
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}Create Room{% endblock %}
+{% block content %}
 
-<div class="container">
-    <h1>Create a New Room</h1>
+<main class="flex-1 p-8">
+    <!-- Header -->
+    <header class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-800">Create a New Room</h1>
+        <p class="text-gray-500 mt-1">Set up a space for your team to collaborate.</p>
+    </header>
 
-    <form method="post">
-        {% csrf_token %}
+    <!-- Create Room Card -->
+    <div class="bg-white rounded-xl shadow p-6 max-w-lg">
+        <form method="post" class="space-y-5">
+            {% csrf_token %}
 
-        <label for="id_name">Room Name</label>
-        <input type="text" name="name" id="id_name" required>
+            <!-- Room Name -->
+            <div>
+                <label for="id_name" class="block text-sm font-medium text-gray-700 mb-1">Room Name</label>
+                <input type="text" name="name" id="id_name" required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    placeholder="e.g. Study Group">
+            </div>
 
-        <label for="id_description">Description (optional)</label>
-        <textarea name="description" id="id_description" rows="4"></textarea>
+            <!-- Room Type -->
+            <div>
+                <label for="id_room_type" class="block text-sm font-medium text-gray-700 mb-1">Room Type</label>
+                <select name="room_type" id="id_room_type"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white">
+                    <option value="study">Study</option>
+                    <option value="class">Class</option>
+                    <option value="group">Group</option>
+                </select>
+            </div>
 
-        <button type="submit">Create Room</button>
-    </form>
+            <!-- Description -->
+            <div>
+                <label for="id_description" class="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
+                <textarea name="description" id="id_description" rows="3"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                    placeholder="What's this room about?"></textarea>
+            </div>
 
-    <a href="{% url 'rooms:room_list' %}" class="back">← Back to Rooms</a>
-</div>
+            <!-- Private Toggle -->
+            <div class="flex items-center gap-3">
+                <input type="checkbox" name="is_private" id="id_is_private"
+                    class="w-4 h-4 accent-purple-600 rounded">
+                <label for="id_is_private" class="text-sm text-gray-700">Make this room private (invite only)</label>
+            </div>
 
-</body>
-</html>
+            <!-- Submit Button -->
+            <button type="submit"
+                class="w-full px-4 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition">
+                Create Room
+            </button>
+        </form>
+
+        <!-- Back Link -->
+        <a href="{% url 'dashboard' %}" class="inline-flex items-center gap-1 mt-6 text-purple-600 hover:text-purple-800 text-sm font-medium">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+            Back to Dashboard
+        </a>
+    </div>
+</main>
+
+{% endblock %}

@@ -20,4 +20,5 @@ urlpatterns = [
     path('invites/<int:invite_id>/accept/', views.accept_invite, name='accept_invite'),
     path('invites/<int:invite_id>/decline/', views.decline_invite, name='decline_invite'),
     path('join/<str:code>/', views.join_by_code, name='join_by_code'),
+    path('<int:room_id>/delete/', views.delete_room, name='delete_room'),
 ]
