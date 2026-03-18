@@ -22,11 +22,13 @@ def room_list(request):
 def create_room(request):
     if request.method == 'POST':
         name = request.POST.get('name')
+        description = request.POST.get('description', '')
         room_type = request.POST.get('room_type', 'study')
         is_private = request.POST.get('is_private') == 'on'
 
         room = StudyRoom.objects.create(
             name=name,
+            description=description,
             room_type=room_type,
             is_private=is_private,
             created_by=request.user
@@ -180,3 +182,22 @@ def join_by_code(request, code):
     )
 
     return redirect('rooms:room_chat', room_id=room.id)
+
+
+@login_required
+def delete_room(request, room_id):
+    room = get_object_or_404(StudyRoom, id=room_id)
+    
+    # Only the owner can delete
+    membership = RoomMembership.objects.filter(
+        user=request.user, room=room, role='owner'
+    ).first()
+    
+    if not membership:
+        return redirect('rooms:room_list')
+    
+    if request.method == 'POST':
+        room.delete()
+        return redirect('dashboard')
+    
+    return redirect('rooms:room_detail', room_id=room_id)

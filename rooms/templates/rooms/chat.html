@@ -3,10 +3,26 @@
 {% block content %}
 <div class="flex w-full">
     <div class="w-56 bg-violet-200/50 rounded-t-lg flex flex-col ">
-        <div class="p-4 flex justify-between border-b border-gray-400">
+        <div class="p-4 flex justify-between items-center border-b border-gray-400">
             <h1 class="text-bold text-xl">{{ room.name }}</h1>
-            <span class="material-symbols-outlined">person_add</span>
+            <div class="flex gap-2">
+                <span class="material-symbols-outlined cursor-pointer hover:text-purple-600">person_add</span>
+                {% if membership.role == 'owner' %}
+                <span class="material-symbols-outlined cursor-pointer hover:text-red-600" onclick="openDeleteModal()">delete</span>
+                {% endif %}
+            </div>
         </div>
+        {% if membership.role == 'owner' %}
+        <div class="p-3 bg-purple-100 border-b border-gray-400">
+            <p class="text-xs text-gray-600 mb-1">Invite Code (share with friends)</p>
+            <div class="flex items-center gap-2">
+                <code id="inviteCode" class="bg-white px-3 py-1 rounded text-sm font-mono text-purple-700 flex-1">{{ room.invite_code }}</code>
+                <button onclick="copyInviteCode()" class="p-1 hover:bg-purple-200 rounded transition" title="Copy code">
+                    <span class="material-symbols-outlined text-purple-600 text-sm">content_copy</span>
+                </button>
+            </div>
+        </div>
+        {% endif %}
         <div class="p-4 flex border-b border-gray-400">
             <span class="material-symbols-outlined">manage_search</span>
             <h1 class="text-md">Browse Channels</h1>
@@ -30,13 +46,38 @@
     </div>
 </div>
 
-
 <!-- <div id="messages" style="border:1px solid #ccc; height:300px; overflow-y:auto;"></div>
-
 <input id="messageInput" type="text" placeholder="Type a message...">
 <button id="sendBtn">Send</button> -->
 
-
+<!-- Delete Confirmation Modal -->
+{% if membership.role == 'owner' %}
+<div id="deleteModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-4">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-red-600">warning</span>
+            </div>
+            <h2 class="text-lg font-bold text-gray-800">Delete Room?</h2>
+        </div>
+        <p class="text-gray-600 mb-2">Are you sure you want to delete <strong>{{ room.name }}</strong>?</p>
+        <p class="text-sm text-gray-500 mb-6">This action cannot be undone. You'll need to be invited again, use an invite code, or create a new room to rejoin.</p>
+        <div class="flex gap-3 justify-end">
+            <button onclick="closeDeleteModal()" 
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                Cancel
+            </button>
+            <form method="POST" action="{% url 'rooms:delete_room' room.id %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" 
+                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                    Delete Room
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <script>
     const roomId = "{{ room.id }}";
@@ -57,6 +98,23 @@
         }));
         input.value = "";
     };
+
+    function openDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.add('flex');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.remove('flex');
+    }
+
+    function copyInviteCode() {
+        const code = document.getElementById('inviteCode').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            alert('Invite code copied!');
+        });
+    }
 </script>
 
 {% endblock %}
