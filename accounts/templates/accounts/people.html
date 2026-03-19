@@ -9,18 +9,9 @@
 
     <!-- Search -->
     <form method="GET" class="flex gap-2 mb-6 max-w-lg">
-        <input 
-            type="text" 
-            name="q" 
-            value="{{ query }}" 
-            placeholder="Search by username..."
-            class="flex-1 border border-purple-200 rounded-lg px-3 py-2 text-sm 
-                   focus:outline-none focus:ring-2 focus:ring-purple-400"
-        />
-        <button 
-            type="submit"
-            class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700"
-        >
+        <input type="text" name="q" value="{{ query }}" placeholder="Search by username..." class="flex-1 border border-purple-200 rounded-lg px-3 py-2 text-sm 
+                   focus:outline-none focus:ring-2 focus:ring-purple-400" />
+        <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
             Search
         </button>
     </form>
@@ -29,12 +20,16 @@
     <div class="bg-white rounded-xl shadow divide-y divide-gray-100 max-w-lg">
         {% for u in users %}
         <div class="flex items-center gap-4 p-4">
-            
+
             <!-- Avatar -->
-            <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center 
-                        font-bold text-purple-700">
-                {{ u.username|first|upper }}
+            {% if u.userprofile.avatar %}
+            <img class="rounded-full w-9 h-9 object-cover flex-shrink-0" src="{{ u.userprofile.avatar.url }}"
+                alt="Avatar">
+            {% else %}
+            <div class="flex items-center justify-center rounded-full w-9 h-9 bg-purple-100 flex-shrink-0">
+                <span class="material-symbols-outlined text-purple-600">person</span>
             </div>
+            {% endif %}
 
             <!-- Username + Bio -->
             <div class="flex-1">
@@ -45,22 +40,18 @@
             </div>
 
             <!-- Message Button -->
-            <a 
-                href="{% url 'start_dm' u.username %}"
-                class="flex items-center gap-1 px-3 py-2 bg-purple-600 text-white rounded-lg 
-                       text-xs hover:bg-purple-700 transition"
-            >
+            <a href="{% url 'start_dm' u.username %}" class="flex items-center gap-1 px-3 py-2 bg-purple-600 text-white rounded-lg 
+                       text-xs hover:bg-purple-700 transition">
                 <span class="material-symbols-outlined text-sm">chat</span>
                 Message
             </a>
-
         </div>
         {% empty %}
         <div class="p-6 text-center text-gray-400 text-sm">
             {% if query %}
-                No users found for "{{ query }}"
+            No users found for "{{ query }}"
             {% else %}
-                No other users yet.
+            No other users yet.
             {% endif %}
         </div>
         {% endfor %}
