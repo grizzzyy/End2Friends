@@ -47,14 +47,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
             message = data.get("message", "").strip()
             user = self.scope["user"]
+            msg_type = data.get("type", "chat")
 
             print(f"[WS] Message from {user}: {message}")
 
-            if not message or not user.is_authenticated:
-                print("[WS] Rejected - empty message or unauthenticated user")
+            if not user.is_authenticated:
+                print("[WS] Rejected - unauthenticated user")
+                return
+            
+            if msg_type == "edit":
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {"type": "message_edited", "message_id": data.get("message_id"), "content": data.get("content", "")},
+                )
                 return
 
-            await self.save_message(user, self.room_id, message)
+            if msg_type == "delete":
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {"type": "message_deleted", "message_id": data.get("message_id")},
+                )
+                return
+
+            if not message:
+                print("[WS] Rejected - empty message")
+                return            
+
+            save_id = await self.save_message(user, self.room_id, message)
 
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -62,6 +81,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "type": "chat_message",
                     "message": message,
                     "username": user.username,
+                    "message_id": save_id,
                 },
             )
 
@@ -93,6 +113,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 conversation=conversation, user=user, content=content
             )
             print(f"[WS] Saved message id={msg.id}")
+            return msg.id
         except Conversation.DoesNotExist:
             print(f"[WS ERROR] Conversation not found for room_id={room_id}")
         except Exception as e:

@@ -129,8 +129,15 @@
 
             <!-- User -->
             <div class="p-4 flex items-center gap-3 border-b border-purple-100">
-                <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-purple-600">person</span>
+                <div class="flex justify-center">
+                    {% if user.userprofile.avatar %}
+                    <img class="rounded-full w-9 h-9 object-cover flex-shrink-0" src="{{ user.userprofile.avatar.url }}"
+                        alt="Avatar">
+                    {% else %}
+                    <div class="flex items-center justify-center rounded-full w-9 h-9 bg-purple-100 flex-shrink-0">
+                        <span class="material-symbols-outlined text-purple-600">person</span>
+                    </div>
+                    {% endif %}
                 </div>
                 <span class="text-gray-700 text-sm nav-text">{{ user.username }}</span>
             </div>

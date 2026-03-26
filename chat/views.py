@@ -2,6 +2,10 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from .models import Conversation, Message
+import json
+from django.http import JsonResponse
+from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 User = get_user_model()
 
@@ -61,10 +65,8 @@ def chat_room(request, room_name):
         "other_user": other_user,
     })
 
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-
 @login_required
+@require_POST
 def delete_conversation(request, room_id):
     convo = get_object_or_404(Conversation, room_id=room_id)
 
@@ -73,3 +75,35 @@ def delete_conversation(request, room_id):
         convo.delete()
 
     return redirect('inbox')
+
+@login_required
+def edit_message(request, message_id):
+    msg = Message.objects.get(pk=message_id)
+
+    if msg.user != request.user:
+        return JsonResponse({"error": "Not allowed."}, status=403)
+
+    body = json.loads(request.body)
+    new_content = body.get("content", "").strip()
+
+    msg.content = new_content
+    msg.is_edited = True
+    msg.edited_at = timezone.now()
+    msg.save(update_fields=["content", "is_edited", "edited_at"])
+
+    return JsonResponse({"ok": True, "content": msg.content})
+
+
+@login_required
+def delete_message(request, message_id):
+    msg = Message.objects.get(pk=message_id)
+
+    if msg.user != request.user:
+        return JsonResponse({"error": "Not allowed."}, status=403)
+
+    msg.is_deleted = True
+    msg.deleted_at = timezone.now()
+    msg.content = ""
+    msg.save(update_fields=["is_deleted", "deleted_at", "content"])
+
+    return JsonResponse({"ok": True})
