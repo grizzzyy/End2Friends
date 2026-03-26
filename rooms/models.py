@@ -1,6 +1,8 @@
 import uuid
 from django.db import models
 from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 def generate_code():
@@ -96,3 +98,61 @@ class RoomInvite(models.Model):
 
     def __str__(self):
         return f"Invite to {self.room} for {self.invited_user}"
+
+
+class Channel(models.Model):
+    name = models.CharField(max_length=100)
+
+    room = models.ForeignKey(
+        "StudyRoom",
+        on_delete=models.CASCADE,
+        related_name="room_channels"
+    )
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="created_room_channels"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['name', 'room']
+
+    def __str__(self):
+        return f"#{self.name} in {self.room}"
+
+
+class Message(models.Model):
+    channel = models.ForeignKey(
+        "Channel",
+        on_delete=models.CASCADE,
+        related_name="messages"
+    )
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="channel_messages"
+    )
+
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"{self.user.username}: {self.content[:30]}"
+
+
+@receiver(post_save, sender=StudyRoom)
+def create_default_channel(sender, instance, created, **kwargs):
+    """Auto-create a 'General' channel when a new room is created."""
+    if created:
+        Channel.objects.create(
+            name="General",
+            room=instance,
+            created_by=instance.created_by
+        )

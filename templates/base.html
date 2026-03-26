@@ -143,6 +143,12 @@
                     <span class="nav-text">Dashboard</span>
                     <span class="tooltip">Dashboard</span>
                 </a>
+                <a href="{% url 'rooms:room_list' %}"
+                    class="nav-link {% if '/rooms/' in request.path %}active{% endif %}">
+                    <span class="material-symbols-outlined flex-shrink-0">groups</span>
+                    <span class="nav-text">Rooms</span>
+                    <span class="tooltip">Rooms</span>
+                </a>
                 <a href="#" class="nav-link">
                     <span class="material-symbols-outlined flex-shrink-0">chat</span>
                     <span class="nav-text">Messages</span>

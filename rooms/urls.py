@@ -21,4 +21,9 @@ urlpatterns = [
     path('invites/<int:invite_id>/decline/', views.decline_invite, name='decline_invite'),
     path('join/<str:code>/', views.join_by_code, name='join_by_code'),
     path('<int:room_id>/delete/', views.delete_room, name='delete_room'),
+
+    # Channel URLs
+    path('<int:room_id>/channels/create/', views.create_channel, name='create_channel'),
+    path('<int:room_id>/channels/<int:channel_id>/', views.channel_chat, name='channel_chat'),
+    path('<int:room_id>/channels/<int:channel_id>/delete/', views.delete_channel, name='delete_channel'),
 ]
