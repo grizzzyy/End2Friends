@@ -1,7 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
-from .models import StudyRoom, RoomMembership, RoomInvite
+from django.contrib import messages
+from django.db import IntegrityError
+from .models import StudyRoom, RoomMembership, RoomInvite, Channel, Message
 
 User = get_user_model()
 
@@ -163,10 +165,14 @@ def room_chat(request, room_id):
         room=room
     ).select_related('user')
 
+    # Get all channels for this room
+    channels = room.room_channels.all().order_by('created_at')
+
     return render(request, 'rooms/chat.html', {
         'room': room,
         'members': members,
         'membership': membership,
+        'channels': channels,
     })
 
     
@@ -201,3 +207,99 @@ def delete_room(request, room_id):
         return redirect('dashboard')
     
     return redirect('rooms:room_detail', room_id=room_id)
+
+
+@login_required
+def create_channel(request, room_id):
+    """Create a new channel - owner only."""
+    room = get_object_or_404(StudyRoom, id=room_id)
+    
+    # Check if user is owner
+    membership = RoomMembership.objects.filter(
+        user=request.user, room=room, role='owner'
+    ).first()
+    
+    if not membership:
+        messages.error(request, "Only the room owner can create channels.")
+        return redirect('rooms:room_chat', room_id=room_id)
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        
+        # Validate blank name
+        if not name:
+            messages.error(request, "Channel name cannot be empty.")
+            return redirect('rooms:room_chat', room_id=room_id)
+        
+        # Try to create (unique_together will catch duplicates)
+        try:
+            Channel.objects.create(
+                name=name,
+                room=room,
+                created_by=request.user
+            )
+            messages.success(request, f"Channel '#{name}' created!")
+        except IntegrityError:
+            messages.error(request, f"A channel named '{name}' already exists.")
+        
+        return redirect('rooms:room_chat', room_id=room_id)
+    
+    return redirect('rooms:room_chat', room_id=room_id)
+
+
+@login_required
+def delete_channel(request, room_id, channel_id):
+    """Delete a channel - owner only."""
+    room = get_object_or_404(StudyRoom, id=room_id)
+    channel = get_object_or_404(Channel, id=channel_id, room=room)
+    
+    # Check if user is owner
+    membership = RoomMembership.objects.filter(
+        user=request.user, room=room, role='owner'
+    ).first()
+    
+    if not membership:
+        messages.error(request, "Only the room owner can delete channels.")
+        return redirect('rooms:room_chat', room_id=room_id)
+    
+    if request.method == 'POST':
+        channel_name = channel.name
+        channel.delete()
+        messages.success(request, f"Channel '#{channel_name}' deleted.")
+        return redirect('rooms:room_chat', room_id=room_id)
+    
+    return redirect('rooms:room_chat', room_id=room_id)
+
+
+@login_required
+def channel_chat(request, room_id, channel_id):
+    """View a channel's chat - members only."""
+    room = get_object_or_404(StudyRoom, id=room_id)
+    channel = get_object_or_404(Channel, id=channel_id, room=room)
+    
+    # Check if user is a member
+    membership = RoomMembership.objects.filter(
+        user=request.user, room=room
+    ).first()
+    
+    if not membership:
+        messages.error(request, "You must be a member to view this channel.")
+        return redirect('rooms:room_list')
+    
+    # Get all channels for sidebar
+    channels = room.room_channels.all().order_by('created_at')
+    
+    # Get messages for this channel
+    channel_messages = channel.messages.select_related('user').order_by('timestamp')
+    
+    # Get room members
+    members = RoomMembership.objects.filter(room=room).select_related('user')
+    
+    return render(request, 'rooms/channel_chat.html', {
+        'room': room,
+        'channel': channel,
+        'channels': channels,
+        'channel_messages': channel_messages,
+        'members': members,
+        'membership': membership,
+    })

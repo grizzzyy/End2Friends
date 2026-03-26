@@ -1,59 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Rooms</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 2rem;
-            background: #f7f7f7;
-        }
-        h1 {
-            margin-bottom: 1rem;
-        }
-        .room-list {
-            list-style: none;
-            padding: 0;
-        }
-        .room-list li {
-            background: white;
-            padding: 1rem;
-            margin-bottom: .5rem;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-        }
-        .room-list a {
-            text-decoration: none;
-            color: #007bff;
-            font-weight: bold;
-        }
-        .room-list a:hover {
-            text-decoration: underline;
-        }
-        .empty {
-            color: #666;
-            font-style: italic;
-        }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block title %}My Rooms{% endblock %}
+{% block content %}
 
-    <h1>Available Rooms</h1>
+<main class="flex-1 p-8">
+    <header class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-800">My Rooms</h1>
+        <p class="text-gray-500 mt-1">Rooms you're a member of</p>
+    </header>
 
-    {% if rooms %}
-        <ul class="room-list">
-            {% for room in rooms %}
-                <li>
-                    <a href="{% url 'rooms:room_detail' room.id %}">
-                        {{ room.name }}
-                    </a>
-                </li>
+    <div class="bg-white rounded-xl shadow p-6">
+        {% if my_rooms %}
+        <ul class="space-y-3">
+            {% for room in my_rooms %}
+            <li>
+                <a href="{% url 'rooms:room_chat' room.id %}"
+                    class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition">
+                    <div class="w-10 h-10 bg-purple-200 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-purple-600">groups</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-gray-800 font-medium">{{ room.name }}</p>
+                        <p class="text-xs text-gray-400">{{ room.get_room_type_display }} Room</p>
+                    </div>
+                    <span class="material-symbols-outlined text-gray-400">chevron_right</span>
+                </a>
+            </li>
             {% endfor %}
         </ul>
-    {% else %}
-        <p class="empty">No rooms available yet.</p>
-    {% endif %}
+        {% else %}
+        <p class="text-center text-gray-400 py-8">No rooms yet. Create or join one!</p>
+        {% endif %}
 
-</body>
-</html>
+        <div class="flex gap-3 mt-6">
+            <a href="{% url 'rooms:create_room' %}"
+                class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
+                + Create Room
+            </a>
+        </div>
+    </div>
+
+    {% if public_rooms %}
+    <div class="bg-white rounded-xl shadow p-6 mt-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Public Rooms</h2>
+        <ul class="space-y-3">
+            {% for room in public_rooms %}
+            <li>
+                <a href="{% url 'rooms:room_detail' room.id %}"
+                    class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-purple-50 transition">
+                    <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-gray-600">groups</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-gray-800 font-medium">{{ room.name }}</p>
+                        <p class="text-xs text-gray-400">{{ room.get_room_type_display }} Room</p>
+                    </div>
+                    <span class="text-xs text-purple-600">Join</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</main>
+
+{% endblock %}

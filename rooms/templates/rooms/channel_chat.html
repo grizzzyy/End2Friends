@@ -1,0 +1,324 @@
+{% extends 'base.html' %}
+{% block title %}#{{ channel.name }} - {{ room.name }}{% endblock %}
+{% block content %}
+<div class="flex w-full flex-1 h-screen max-h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <div class="w-52 bg-violet-100/80 flex flex-col border-r border-purple-200">
+        <!-- Room Header -->
+        <div class="p-3 flex justify-between items-center bg-purple-200/50">
+            <h1 class="font-semibold text-gray-800 truncate">{{ room.name }}</h1>
+            <div class="flex gap-1">
+                {% if membership.role == 'owner' %}
+                <button onclick="openDeleteRoomModal()" class="p-1 rounded hover:bg-red-100 transition" title="Delete room">
+                    <span class="material-symbols-outlined text-gray-500 hover:text-red-600 text-lg">delete</span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if membership.role == 'owner' %}
+        <!-- Invite Code -->
+        <div class="px-3 py-2 bg-purple-50 border-b border-purple-200">
+            <div class="flex items-center gap-1">
+                <code id="inviteCode" class="text-xs font-mono text-purple-600 flex-1 truncate">{{ room.invite_code }}</code>
+                <button onclick="copyInviteCode()" class="p-1 hover:bg-purple-200 rounded" title="Copy invite code">
+                    <span class="material-symbols-outlined text-purple-500 text-sm">content_copy</span>
+                </button>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Channels Header -->
+        <div class="px-3 py-2 flex justify-between items-center">
+            <span class="text-xs font-semibold text-gray-500 uppercase">Channels</span>
+            {% if membership.role == 'owner' %}
+            <button onclick="openChannelModal()" class="hover:bg-purple-200 rounded p-0.5 transition" title="New channel">
+                <span class="material-symbols-outlined text-purple-500 text-sm">add</span>
+            </button>
+            {% endif %}
+        </div>
+
+        <!-- Channel List -->
+        <div class="flex-1 overflow-y-auto px-2 space-y-0.5">
+            {% for ch in channels %}
+            <a href="{% url 'rooms:channel_chat' room.id ch.id %}" 
+               class="flex items-center gap-1.5 px-2 py-1.5 rounded text-sm transition {% if ch.id == channel.id %}bg-purple-300/60 text-purple-800 font-medium{% else %}text-gray-600 hover:bg-purple-200/50 hover:text-purple-700{% endif %}">
+                <span class="text-purple-400">#</span>
+                <span class="truncate">{{ ch.name }}</span>
+            </a>
+            {% empty %}
+            <p class="px-2 py-4 text-center text-gray-400 text-xs">No channels yet</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="flex-1 flex flex-col bg-white">
+        <!-- Channel Header -->
+        <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+            <div class="flex items-center gap-2">
+                <span class="text-gray-400 text-xl">#</span>
+                <h2 class="text-xl font-bold text-gray-800">{{ channel.name }}</h2>
+            </div>
+            {% if membership.role == 'owner' %}
+            <button onclick="openDeleteChannelModal()" class="text-gray-400 hover:text-red-600 transition" title="Delete channel">
+                <span class="material-symbols-outlined">delete</span>
+            </button>
+            {% endif %}
+        </div>
+
+        <!-- Flash Messages -->
+        {% if messages %}
+        <div class="p-4">
+            {% for message in messages %}
+            <div class="mb-2 p-3 rounded-lg {% if message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Messages Area -->
+        <div id="messagesContainer" class="flex-1 overflow-y-auto p-4 flex flex-col">
+            <div class="flex-1"></div>
+            <div id="messagesList" class="space-y-3">
+            {% for msg in channel_messages %}
+            {% if msg.user == request.user %}
+            <!-- Own message - right side -->
+            <div class="flex justify-end">
+                <div class="max-w-xs">
+                    <div class="bg-purple-500 text-white px-3 py-2 rounded-2xl rounded-br-sm">
+                        <p class="text-sm">{{ msg.content }}</p>
+                    </div>
+                    <p class="text-xs text-gray-400 text-right mt-0.5">{{ msg.timestamp|date:"H:i" }}</p>
+                </div>
+            </div>
+            {% else %}
+            <!-- Other's message - left side -->
+            <div class="flex justify-start">
+                <div class="max-w-xs">
+                    <p class="text-xs text-gray-500 mb-0.5">{{ msg.user.username }}</p>
+                    <div class="bg-gray-100 text-gray-800 px-3 py-2 rounded-2xl rounded-bl-sm">
+                        <p class="text-sm">{{ msg.content }}</p>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ msg.timestamp|date:"H:i" }}</p>
+                </div>
+            </div>
+            {% endif %}
+            {% empty %}
+            <div class="text-center text-gray-400 py-4">
+                <span class="material-symbols-outlined text-4xl mb-1">chat</span>
+                <p class="text-sm">No messages yet. Say hi!</p>
+            </div>
+            {% endfor %}
+            </div>
+        </div>
+
+        <!-- Message Input -->
+        <div class="p-3 border-t border-gray-200 bg-gray-50">
+            <div class="flex gap-2 items-center">
+                <input type="text" id="messageInput" 
+                    class="flex-1 px-4 py-2 bg-white border border-gray-200 rounded-full focus:outline-none focus:border-purple-400"
+                    placeholder="Type a message...">
+                <button id="sendBtn" 
+                    class="p-2 bg-purple-500 text-white rounded-full hover:bg-purple-600 transition">
+                    <span class="material-symbols-outlined text-lg">send</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Room Modal -->
+{% if membership.role == 'owner' %}
+<div id="deleteRoomModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-4">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-red-600">warning</span>
+            </div>
+            <h2 class="text-lg font-bold text-gray-800">Delete Room?</h2>
+        </div>
+        <p class="text-gray-600 mb-2">Are you sure you want to delete <strong>{{ room.name }}</strong>?</p>
+        <p class="text-sm text-gray-500 mb-6">This action cannot be undone.</p>
+        <div class="flex gap-3 justify-end">
+            <button onclick="closeDeleteRoomModal()" 
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                Cancel
+            </button>
+            <form method="POST" action="{% url 'rooms:delete_room' room.id %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                    Delete Room
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Channel Modal -->
+<div id="deleteChannelModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-4">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-red-600">warning</span>
+            </div>
+            <h2 class="text-lg font-bold text-gray-800">Delete Channel?</h2>
+        </div>
+        <p class="text-gray-600 mb-2">Are you sure you want to delete <strong>#{{ channel.name }}</strong>?</p>
+        <p class="text-sm text-gray-500 mb-6">All messages in this channel will be permanently deleted.</p>
+        <div class="flex gap-3 justify-end">
+            <button onclick="closeDeleteChannelModal()" 
+                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                Cancel
+            </button>
+            <form method="POST" action="{% url 'rooms:delete_channel' room.id channel.id %}" class="inline">
+                {% csrf_token %}
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                    Delete Channel
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Create Channel Modal -->
+<div id="channelModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-4 w-full">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-purple-600">tag</span>
+            </div>
+            <h2 class="text-lg font-bold text-gray-800">Create Channel</h2>
+        </div>
+        <form method="POST" action="{% url 'rooms:create_channel' room.id %}">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="channel_name" class="block text-sm font-medium text-gray-700 mb-1">Channel Name</label>
+                <input type="text" id="channel_name" name="name" required
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="e.g. homework, announcements" maxlength="100">
+            </div>
+            <div class="flex gap-3 justify-end">
+                <button type="button" onclick="closeChannelModal()"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                    Cancel
+                </button>
+                <button type="submit"
+                    class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                    Create Channel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<script>
+    const roomId = "{{ room.id }}";
+    const channelId = "{{ channel.id }}";
+    
+    // WebSocket connection for real-time messaging
+    const socket = new WebSocket(
+        "ws://" + window.location.host + "/ws/chat/channel/" + channelId + "/"
+    );
+
+    const currentUser = "{{ request.user.username }}";
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const container = document.getElementById('messagesContainer');
+        const list = document.getElementById('messagesList');
+        const isOwn = data.user === currentUser;
+        
+        const msgDiv = document.createElement('div');
+        msgDiv.className = isOwn ? 'flex justify-end' : 'flex justify-start';
+        
+        if (isOwn) {
+            msgDiv.innerHTML = `
+                <div class="max-w-xs">
+                    <div class="bg-purple-500 text-white px-3 py-2 rounded-2xl rounded-br-sm">
+                        <p class="text-sm">${data.message}</p>
+                    </div>
+                    <p class="text-xs text-gray-400 text-right mt-0.5">Just now</p>
+                </div>
+            `;
+        } else {
+            msgDiv.innerHTML = `
+                <div class="max-w-xs">
+                    <p class="text-xs text-gray-500 mb-0.5">${data.user}</p>
+                    <div class="bg-gray-100 text-gray-800 px-3 py-2 rounded-2xl rounded-bl-sm">
+                        <p class="text-sm">${data.message}</p>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-0.5">Just now</p>
+                </div>
+            `;
+        }
+        list.appendChild(msgDiv);
+        container.scrollTop = container.scrollHeight;
+    };
+
+    document.getElementById('sendBtn').onclick = function() {
+        const input = document.getElementById('messageInput');
+        if (input.value.trim()) {
+            socket.send(JSON.stringify({
+                'message': input.value
+            }));
+            input.value = '';
+        }
+    };
+
+    document.getElementById('messageInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            document.getElementById('sendBtn').click();
+        }
+    });
+
+    // Modal functions
+    function openDeleteRoomModal() {
+        document.getElementById('deleteRoomModal').classList.remove('hidden');
+        document.getElementById('deleteRoomModal').classList.add('flex');
+    }
+
+    function closeDeleteRoomModal() {
+        document.getElementById('deleteRoomModal').classList.add('hidden');
+        document.getElementById('deleteRoomModal').classList.remove('flex');
+    }
+
+    function openDeleteChannelModal() {
+        document.getElementById('deleteChannelModal').classList.remove('hidden');
+        document.getElementById('deleteChannelModal').classList.add('flex');
+    }
+
+    function closeDeleteChannelModal() {
+        document.getElementById('deleteChannelModal').classList.add('hidden');
+        document.getElementById('deleteChannelModal').classList.remove('flex');
+    }
+
+    function openChannelModal() {
+        document.getElementById('channelModal').classList.remove('hidden');
+        document.getElementById('channelModal').classList.add('flex');
+        document.getElementById('channel_name').focus();
+    }
+
+    function closeChannelModal() {
+        document.getElementById('channelModal').classList.add('hidden');
+        document.getElementById('channelModal').classList.remove('flex');
+        document.getElementById('channel_name').value = '';
+    }
+
+    function copyInviteCode() {
+        const code = document.getElementById('inviteCode').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            alert('Invite code copied!');
+        });
+    }
+
+    // Scroll to bottom on load
+    window.onload = function() {
+        const container = document.getElementById('messagesContainer');
+        container.scrollTop = container.scrollHeight;
+    };
+</script>
+
+{% endblock %}
