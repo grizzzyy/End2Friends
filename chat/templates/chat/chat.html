@@ -24,13 +24,47 @@
         <!-- Messages Area -->
         <div id="chat-log" class="flex-1 overflow-y-auto p-6 space-y-4">
             {% for message in messages %}
-            {% if message.user == request.user %}
-            <!-- Sent message (right side) -->
+            {% if message.is_deleted %}
             <div class="flex justify-end">
-                <div class="max-w-md">
+                <p class="text-xs text-gray-400 italic px-4 py-2 bg-white/60 rounded-full border border-gray-200">
+                    This message was deleted.
+                </p>
+            </div>
+            {% elif message.user == request.user %}
+            <!-- Sent message (right side) -->
+            <div class="flex justify-end message-row group" data-msg-id="{{ message.id }}">
+                <div class="relative max-w-md">
+                    <!-- Action bar -->
+                    <div class="action-bar">
+                        <button onclick="startEdit('{{ message.id }}')" title="Edit message" class="action-btn">
+                            <span class="material-symbols-outlined text-[18px] text-purple-500">edit</span>
+                        </button>
+                        <button onclick="deleteMessage('{{ message.id }}')" title="Delete message" class="action-btn">
+                            <span class="material-symbols-outlined text-[18px] text-red-400">delete</span>
+                        </button>
+                    </div>
+
                     <p class="text-xs text-gray-400 text-right mb-1">{{ message.timestamp|timesince }} ago</p>
-                    <div class="msg-sent px-4 py-3 text-sm shadow-sm">
+                    <div id="msg-edit-{{ message.id }}" class="msg-sent px-4 py-3 text-sm shadow-sm">
                         {{ message.content }}
+                    </div>
+
+                    <!-- Inline edit -->
+                    <div id="edit-{{ message.id }}" class="hidden">
+                        <textarea id="edit-input-{{ message.id }}" class="w-full rounded-2xl px-4 py-3 text-sm text-gray-800
+               border-2 border-purple-400 focus:outline-none focus:border-purple-600
+               resize-none bg-white shadow-sm" rows="2">{{ message.content }}</textarea>
+                        <div class="flex gap-2 mt-1 justify-end">
+                            <button onclick="cancelEdit('{{ message.id }}')"
+                                class="text-xs text-gray-400 hover:text-gray-600 px-3 py-1 rounded-full border border-gray-200 bg-white">
+                                Cancel
+                            </button>
+                            <button onclick="submitEdit('{{ message.id }}')"
+                                class="text-xs text-white px-3 py-1 rounded-full"
+                                style="background: linear-gradient(135deg, #9B76B4 0%, #7c3aed 100%);">
+                                Save
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -38,8 +72,8 @@
             <!-- Received message (left side) -->
             <div class="flex gap-3">
                 {% if message.user.userprofile.avatar %}
-                <img class="rounded-full w-11 h-11 object-cover flex-shrink-0 mt-2" src="{{ message.user.userprofile.avatar.url }}"
-                    alt="Avatar">
+                <img class="rounded-full w-11 h-11 object-cover flex-shrink-0 mt-2"
+                    src="{{ message.user.userprofile.avatar.url }}" alt="Avatar">
                 {% else %}
                 <div class="flex items-center justify-center rounded-full w-11 h-11 bg-purple-100 flex-shrink-0">
                     <span class="material-symbols-outlined text-purple-600">person</span>
@@ -94,8 +128,6 @@
                 {{ room_name|first|upper }}
             </div>
             <h3 class="font-bold text-gray-800 text-lg">#{{ room_name }}</h3>
-            <p class="text-sm text-gray-400">{{ conversation.participants.count }} member{{
-                conversation.participants.count|pluralize }}</p>
         </div>
 
         <!-- Quick Links -->
@@ -165,6 +197,7 @@
     const roomName = "{{ room_name }}";
     const currentUser = "{{ request.user.username }}";
     const chatLog = document.getElementById('chat-log');
+    const csrfToken = "{{ csrf_token }}";
     chatLog.scrollTop = chatLog.scrollHeight;
 
     const socket = new WebSocket("ws://" + window.location.host + "/ws/chat/" + roomName + "/");
@@ -178,6 +211,23 @@
         const isSent = data.username === currentUser;
         const isOwn = data.username === "{{ request.user.username }}";
         const div = document.createElement('div');
+
+        // edit and delete for other user
+        if (data.type === 'message_edited') {
+            const bubble = document.getElementById(`msg-edit-${data.message_id}`);
+            if (bubble) bubble.textContent = data.content;
+            return;
+        }
+
+        if (data.type === 'message_deleted') {
+            const row = document.querySelector(`.message-row[data-msg-id="${data.message_id}"]`);
+            if (row) {
+                row.className = 'flex';
+                row.removeAttribute('data-msg-id');
+                row.innerHTML = `<p class="text-xs text-gray-400 italic px-4 py-2 bg-white/60 rounded-full border border-gray-200">This message was deleted.</p>`;
+            }
+            return;
+        }
 
         if (isSent) {
             // Sent message (right side, purple)
@@ -226,6 +276,58 @@
         socket.send(JSON.stringify({ message: msg }));
         input.value = '';
     }
+
+    function startEdit(id) {
+        document.getElementById(`msg-edit-${id}`).classList.add('hidden');
+        document.getElementById(`edit-${id}`).classList.remove('hidden');
+        const ta = document.getElementById(`edit-input-${id}`);
+        ta.focus();
+        ta.setSelectionRange(ta.value.length, ta.value.length);
+    }
+
+    function cancelEdit(id) {
+        document.getElementById(`msg-edit-${id}`).classList.remove('hidden');
+        document.getElementById(`edit-${id}`).classList.add('hidden');
+    }
+
+    async function submitEdit(id) {
+        const content = document.getElementById(`edit-input-${id}`).value.trim();
+        if (!content) return;
+
+        const res = await fetch(`/chat/messages/${id}/edit/`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({ content }),
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            document.getElementById(`msg-edit-${id}`).textContent = data.content;
+            cancelEdit(id);
+            socket.send(JSON.stringify({ type: 'edit', message_id: id, content: data.content }));
+        }
+    }
+
+    async function deleteMessage(id) {
+        if (!confirm('Delete this message?')) return;
+
+        const res = await fetch(`/chat/messages/${id}/delete/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrfToken },
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+            const row = document.querySelector(`.message-row[data-msg-id="${id}"]`);
+            if (row) {
+                row.className = 'flex justify-end';
+                row.removeAttribute('data-msg-id');
+                row.innerHTML = `<p class="text-xs text-gray-400 italic px-4 py-2 bg-white/60 rounded-full border border-gray-200">This message was deleted.</p>`;
+            }
+            socket.send(JSON.stringify({ type: 'delete', message_id: id }));
+        }
+    }
+
 </script>
 <style>
     body {
@@ -292,5 +394,45 @@
         background: #f3e8ff;
         color: #7c3aed;
     }
+
+    .action-bar {
+        position: absolute;
+        right: 100%;
+        top: 50%;
+        transform: translateY(-50%);
+        margin-right: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        opacity: 0;
+        pointer-events: none;
+        background: white;
+        border: 1px solid rgb(205, 197, 210);
+        border-radius: 15px;
+        padding: 4px;
+    }
+
+    .group:hover .action-bar {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: white;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .action-btn:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        transform: scale(1.1);
+    }
 </style>
+
 {% endblock %}
