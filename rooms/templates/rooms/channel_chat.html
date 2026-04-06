@@ -219,10 +219,10 @@
     const channelId = "{{ channel.id }}";
     
     // WebSocket connection for real-time messaging
-    const socket = new WebSocket(
-        "ws://" + window.location.host + "/ws/chat/channel/" + channelId + "/"
-    );
-
+const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+const socket = new WebSocket(
+    wsProtocol + window.location.host + "/ws/chat/channel/" + channelId + "/"
+    
     const currentUser = "{{ request.user.username }}";
 
     socket.onmessage = function(e) {

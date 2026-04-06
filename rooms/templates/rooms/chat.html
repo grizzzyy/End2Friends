@@ -157,10 +157,10 @@
 
 <script>
     const roomId = "{{ room.id }}";
-    const socket = new WebSocket(
-        "ws://" + window.location.host + "/ws/chat/room/" + roomId + "/"
-    );
-
+const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+const socket = new WebSocket(
+    wsProtocol + window.location.host + "/ws/chat/room/" + roomId + "/"
+    
     socket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         const messagesDiv = document.getElementById("messages");

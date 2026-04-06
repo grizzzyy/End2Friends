@@ -199,8 +199,8 @@
     const chatLog = document.getElementById('chat-log');
     const csrfToken = "{{ csrf_token }}";
     chatLog.scrollTop = chatLog.scrollHeight;
-
-    const socket = new WebSocket("ws://" + window.location.host + "/ws/chat/" + roomName + "/");
+const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+const socket = new WebSocket(wsProtocol + window.location.host + "/ws/chat/" + roomName + "/");
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
