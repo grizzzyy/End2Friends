@@ -36,3 +36,5 @@ typing_extensions==4.15.0
 tzdata==2025.3
 ujson==5.11.0
 zope.interface==8.2
+python-magic==0.4.27
+python-magic
