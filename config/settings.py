@@ -91,16 +91,23 @@ TEMPLATES = [
 # ---------------------------------------------------------
 # Point Django at the ASGI app instead of WSGI
 ASGI_APPLICATION = 'config.asgi.application'
-}
-# Switch Redis channel layer to use the REDIS_URL env var
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [os.getenv("REDIS_URL")],
+
+# Channel layer - use Redis in production, in-memory for local development
+if DEBUG:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer"
         },
-    },
-}
+    }
+elif os.getenv("REDIS_URL"):
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [os.getenv("REDIS_URL")],
+            },
+        },
+    }
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases

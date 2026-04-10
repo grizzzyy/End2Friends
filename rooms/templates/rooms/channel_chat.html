@@ -220,12 +220,25 @@
     
     // WebSocket connection for real-time messaging
 const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-const socket = new WebSocket(
-    wsProtocol + window.location.host + "/ws/chat/channel/" + channelId + "/"
-    
-    const currentUser = "{{ request.user.username }}";
+const wsUrl = wsProtocol + window.location.host + "/ws/chat/channel/" + channelId + "/";
+console.log("[WS] Connecting to:", wsUrl);
+const socket = new WebSocket(wsUrl);
+const currentUser = "{{ request.user.username }}";
+
+    socket.onopen = function(e) {
+        console.log("[WS] Connected successfully");
+    };
+
+    socket.onerror = function(e) {
+        console.error("[WS] Error:", e);
+    };
+
+    socket.onclose = function(e) {
+        console.log("[WS] Closed:", e.code, e.reason);
+    };
 
     socket.onmessage = function(e) {
+        console.log("[WS] Message received:", e.data);
         const data = JSON.parse(e.data);
         const container = document.getElementById('messagesContainer');
         const list = document.getElementById('messagesList');
