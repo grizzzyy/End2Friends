@@ -6,7 +6,7 @@ from .models import StudyRoom, RoomMembership, RoomInvite
 User = get_user_model()
 
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Room, Channel
+from .models import StudyRoom, RoomMembership, RoomInvite
 
 def create_channel(request, room_id):
     room = get_object_or_404(Room, id=room_id)
