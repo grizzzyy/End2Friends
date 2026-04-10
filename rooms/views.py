@@ -5,6 +5,21 @@ from .models import StudyRoom, RoomMembership, RoomInvite
 
 User = get_user_model()
 
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Room, Channel
+
+def create_channel(request, room_id):
+    room = get_object_or_404(Room, id=room_id)
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        if name:
+            Channel.objects.create(room=room, name=name)
+            return redirect('rooms:room_detail', room_id=room.id)
+
+    return render(request, 'rooms/create_channel.html', {"room": room})
+
+
 
 @login_required
 def room_list(request):
