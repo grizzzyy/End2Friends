@@ -22,5 +22,5 @@ urlpatterns = [
     path('join/<str:code>/', views.join_by_code, name='join_by_code'),
     path('<int:room_id>/delete/', views.delete_room, name='delete_room'),
     path('<int:room_id>/channels/create/', views.create_channel, name='create_channel'),
-,
+
 ]
