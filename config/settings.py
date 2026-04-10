@@ -33,6 +33,10 @@ CSRF_TRUSTED_ORIGINS = [
     if host.strip()
 ]
 
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # Application definition
 
@@ -87,13 +91,6 @@ TEMPLATES = [
 # ---------------------------------------------------------
 # Point Django at the ASGI app instead of WSGI
 ASGI_APPLICATION = 'config.asgi.application'
-
-# Channel layer - use in-memory for development (no Redis needed)
-# For production, switch back to Redis
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer"
-    },
 }
 # Switch Redis channel layer to use the REDIS_URL env var
 CHANNEL_LAYERS = {
