@@ -81,8 +81,9 @@
 
 <script>
     const roomId = "{{ room.id }}";
+    const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
     const socket = new WebSocket(
-        "ws://" + window.location.host + "/ws/chat/room/" + roomId + "/"
+        wsProtocol + window.location.host + "/ws/chat/room/" + roomId + "/"
     );
 
     socket.onmessage = function (e) {

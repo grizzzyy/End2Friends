@@ -26,6 +26,16 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://" + host.strip()
+    for host in os.getenv('ALLOWED_HOSTS', '').split(',')
+    if host.strip() and host.strip() not in ('localhost', '127.0.0.1')
+]
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
 
 
 # Application definition
