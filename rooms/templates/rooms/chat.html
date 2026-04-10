@@ -1,57 +1,109 @@
 {% extends 'base.html' %}
 {% block title %}Dashboard{% endblock %}
 {% block content %}
-<div class="flex w-full">
-    <div class="w-56 bg-violet-200/50 rounded-t-lg flex flex-col ">
+
+<div class="flex h-[85vh] w-full">
+
+    <!-- LEFT SIDEBAR -->
+    <div class="w-64 bg-violet-200/50 border-r border-gray-300 flex flex-col">
+
+        <!-- Room Header -->
         <div class="p-4 flex justify-between items-center border-b border-gray-400">
-            <h1 class="text-bold text-xl">{{ room.name }}</h1>
+            <h1 class="font-bold text-xl">{{ room.name }}</h1>
             <div class="flex gap-2">
                 <span class="material-symbols-outlined cursor-pointer hover:text-purple-600">person_add</span>
+
                 {% if membership.role == 'owner' %}
-                <span class="material-symbols-outlined cursor-pointer hover:text-red-600" onclick="openDeleteModal()">delete</span>
+                <span class="material-symbols-outlined cursor-pointer hover:text-red-600"
+                      onclick="openDeleteModal()">delete</span>
                 {% endif %}
             </div>
         </div>
+
+        <!-- Invite Code -->
         {% if membership.role == 'owner' %}
         <div class="p-3 bg-purple-100 border-b border-gray-400">
-            <p class="text-xs text-gray-600 mb-1">Invite Code (share with friends)</p>
+            <p class="text-xs text-gray-600 mb-1">Invite Code</p>
             <div class="flex items-center gap-2">
-                <code id="inviteCode" class="bg-white px-3 py-1 rounded text-sm font-mono text-purple-700 flex-1">{{ room.invite_code }}</code>
-                <button onclick="copyInviteCode()" class="p-1 hover:bg-purple-200 rounded transition" title="Copy code">
+                <code id="inviteCode"
+                      class="bg-white px-3 py-1 rounded text-sm font-mono text-purple-700 flex-1">
+                    {{ room.invite_code }}
+                </code>
+                <button onclick="copyInviteCode()"
+                        class="p-1 hover:bg-purple-200 rounded transition">
                     <span class="material-symbols-outlined text-purple-600 text-sm">content_copy</span>
                 </button>
             </div>
         </div>
         {% endif %}
-        <div class="p-4 flex border-b border-gray-400">
+
+        <!-- Channels Header -->
+        <div class="p-4 flex items-center gap-2 border-b border-gray-400">
             <span class="material-symbols-outlined">manage_search</span>
-            <h1 class="text-md">Browse Channels</h1>
+            <h1 class="text-md font-semibold">Channels</h1>
         </div>
-        {% for channel in channels %}
-        {% empty %}
-        <div>
-            <h1 class="p-4 text-center text-gray-500 text-sm">No channels created yet.</h1>
+
+        <!-- Channels List -->
+        <div class="flex-1 overflow-y-auto">
+
+            {% for channel in channels %}
+            <a href="{% url 'rooms:channel' room.id channel.id %}"
+               class="flex items-center gap-2 px-4 py-3 border-b border-gray-300 hover:bg-purple-100 transition">
+                <span class="material-symbols-outlined text-purple-600">chat</span>
+                <span>{{ channel.name }}</span>
+            </a>
+            {% empty %}
+            <p class="text-center text-gray-500 text-sm p-4">No channels created yet.</p>
+            {% endfor %}
         </div>
-        {% endfor %}
+
+        <!-- Create Channel Button -->
+        {% if membership.role == 'owner' %}
+        <a href="{% url 'rooms:create_channel' room.id %}"
+           class="p-3 bg-purple-600 text-white text-center hover:bg-purple-700 transition">
+            + Create Channel
+        </a>
+        {% endif %}
     </div>
-    <div class="flex-1">
-        {% for channel in channels %}
-        {% empty %}
-        <div class="h-full flex flex-col justify-center items-center ">
-            <h1 class="text-bold text-4xl">Welcome to {{ room.name }}</h1>
-            <h1 class="pt-2 text-gray-600">This is your brand new {{ room.get_room_type_display }} Room. Below are
-                some suggestions to help get you started.</h1>
+
+    <!-- RIGHT PANEL -->
+    <div class="flex-1 flex flex-col">
+
+        <!-- If no channels exist -->
+        {% if not channels %}
+        <div class="flex-1 flex flex-col justify-center items-center text-center px-6">
+            <h1 class="text-4xl font-bold">Welcome to {{ room.name }}</h1>
+            <p class="pt-2 text-gray-600">
+                This is your brand new {{ room.get_room_type_display }} Room.
+            </p>
         </div>
-        {% endfor %}
+        {% else %}
+
+        <!-- Chat Messages -->
+        <div id="messages"
+             class="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-2 border-b border-gray-300">
+        </div>
+
+        <!-- Chat Input -->
+        <div class="flex border-t border-gray-300">
+            <input id="messageInput"
+                   type="text"
+                   placeholder="Type a message..."
+                   class="flex-1 px-4 py-3 focus:outline-none">
+            <button id="sendBtn"
+                    class="px-6 bg-purple-600 text-white hover:bg-purple-700 transition">
+                Send
+            </button>
+        </div>
+
+        {% endif %}
     </div>
 </div>
-<div id="messages" style="border:1px solid #ccc; height:300px; overflow-y:auto;"></div>
-<input id="messageInput" type="text" placeholder="Type a message...">
-<button id="sendBtn">Send</button>
 
 <!-- Delete Confirmation Modal -->
 {% if membership.role == 'owner' %}
-<div id="deleteModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+<div id="deleteModal"
+     class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
     <div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-4">
         <div class="flex items-center gap-3 mb-4">
             <div class="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
@@ -59,17 +111,21 @@
             </div>
             <h2 class="text-lg font-bold text-gray-800">Delete Room?</h2>
         </div>
-        <p class="text-gray-600 mb-2">Are you sure you want to delete <strong>{{ room.name }}</strong>?</p>
-        <p class="text-sm text-gray-500 mb-6">This action cannot be undone. You'll need to be invited again, use an invite code, or create a new room to rejoin.</p>
+        <p class="text-gray-600 mb-2">
+            Are you sure you want to delete <strong>{{ room.name }}</strong>?
+        </p>
+        <p class="text-sm text-gray-500 mb-6">
+            This action cannot be undone.
+        </p>
         <div class="flex gap-3 justify-end">
-            <button onclick="closeDeleteModal()" 
-                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+            <button onclick="closeDeleteModal()"
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
                 Cancel
             </button>
-            <form method="POST" action="{% url 'rooms:delete_room' room.id %}" class="inline">
+            <form method="POST" action="{% url 'rooms:delete_room' room.id %}">
                 {% csrf_token %}
-                <button type="submit" 
-                    class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                <button type="submit"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                     Delete Room
                 </button>
             </form>
@@ -88,11 +144,18 @@
     socket.onmessage = function (e) {
         const data = JSON.parse(e.data);
         const messagesDiv = document.getElementById("messages");
-        messagesDiv.innerHTML += "<p><strong>" + data.user + ":</strong> " + data.message + "</p>";
+
+        const msg = document.createElement("p");
+        msg.innerHTML = `<strong>${data.user}:</strong> ${data.message}`;
+        messagesDiv.appendChild(msg);
+
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
     };
 
     document.getElementById("sendBtn").onclick = function () {
         const input = document.getElementById("messageInput");
+        if (input.value.trim() === "") return;
+
         socket.send(JSON.stringify({
             "message": input.value
         }));
@@ -100,13 +163,15 @@
     };
 
     function openDeleteModal() {
-        document.getElementById('deleteModal').classList.remove('hidden');
-        document.getElementById('deleteModal').classList.add('flex');
+        const modal = document.getElementById('deleteModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
     }
 
     function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.add('hidden');
-        document.getElementById('deleteModal').classList.remove('flex');
+        const modal = document.getElementById('deleteModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
     }
 
     function copyInviteCode() {
