@@ -59,21 +59,10 @@ def messages_view(request):
 
     conversations = Conversation.objects.filter(
         participants=request.user
-    ).prefetch_related('participants', 'messages').order_by('-id')
-
-    direct_messages = []
-    for convo in conversations:
-        other_user = convo.participants.exclude(id=request.user.id).first()
-        last_message = convo.messages.filter(is_deleted=False).last()
-        direct_messages.append({
-            'conversation': convo,
-            'other_user': other_user,
-            'last_message': last_message,
-            'room_name': convo.room_id,
-        })
+    ).prefetch_related('participants').order_by('-id')
 
     return render(request, "accounts/messages.html", {
-        "direct_messages": direct_messages,
+        "conversations": conversations,
     })
 
 @login_required
