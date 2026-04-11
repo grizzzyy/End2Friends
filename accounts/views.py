@@ -55,12 +55,12 @@ def logout_view(request):
 
 @login_required
 def messages_view(request):
-    # Get all conversations the current user is part of
-    conversations = request.user.conversations.prefetch_related(
-        'participants', 'messages'
-    ).order_by('-messages__timestamp').distinct()
+    from chat.models import Conversation
 
-    # Build a list with the other participant and last message
+    conversations = Conversation.objects.filter(
+        participants=request.user
+    ).prefetch_related('participants', 'messages').order_by('-id')
+
     direct_messages = []
     for convo in conversations:
         other_user = convo.participants.exclude(id=request.user.id).first()
@@ -75,7 +75,6 @@ def messages_view(request):
     return render(request, "accounts/messages.html", {
         "direct_messages": direct_messages,
     })
-
 
 @login_required
 def settings_view(request):
