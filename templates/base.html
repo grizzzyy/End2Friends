@@ -156,11 +156,9 @@
                     <span class="nav-text">Rooms</span>
                     <span class="tooltip">Rooms</span>
                 </a>
-                <a href="#" class="nav-link">
-                    <span class="material-symbols-outlined flex-shrink-0">chat</span>
-                    <span class="nav-text">Messages</span>
-                    <span class="tooltip">Messages</span>
-                </a>
+                <!-- I fixed this from being static to actually going somewhere (yvette) -->
+               <a href="{% url 'messages_page' %}" class="nav-link {% if '/messages/' in request.path %}active{% endif %}">
+               
                 <a href="{% url 'profile' %}" class="nav-link {% if '/profile/' in request.path %}active{% endif %}">
                     <span class="material-symbols-outlined flex-shrink-0">person</span>
                     <span class="nav-text">Profile</span>

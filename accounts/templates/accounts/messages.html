@@ -96,7 +96,7 @@
 {% if direct_messages %}
 <ul class="space-y-3">
     {% for dm in direct_messages %}
-    <a href="{% url 'chat' dm.room_name %}" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition">
+    <a href="{% url 'chat_room' dm.room_name %}" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition">
         <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
             <span class="text-purple-600 font-bold">
                 {{ dm.other_user.username|first|upper }}
