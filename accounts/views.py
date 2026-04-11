@@ -55,9 +55,25 @@ def logout_view(request):
 
 @login_required
 def messages_view(request):
-    """Messages page with empty state"""
+    # Get all conversations the current user is part of
+    conversations = request.user.conversations.prefetch_related(
+        'participants', 'messages'
+    ).order_by('-messages__timestamp').distinct()
+
+    # Build a list with the other participant and last message
+    direct_messages = []
+    for convo in conversations:
+        other_user = convo.participants.exclude(id=request.user.id).first()
+        last_message = convo.messages.filter(is_deleted=False).last()
+        direct_messages.append({
+            'conversation': convo,
+            'other_user': other_user,
+            'last_message': last_message,
+            'room_name': convo.room_id,
+        })
+
     return render(request, "accounts/messages.html", {
-        "direct_messages": [],  # Empty for now - ready for future DM feature
+        "direct_messages": direct_messages,
     })
 
 

@@ -93,20 +93,27 @@
                 
                 {% if direct_messages %}
                 <!-- Message list would go here -->
-                <ul class="space-y-3">
-                    {% for dm in direct_messages %}
-                    <li class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition">
-                        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                            <span class="text-purple-600 font-bold">{{ dm.sender.username|first|upper }}</span>
-                        </div>
-                        <div class="flex-1">
-                            <p class="text-gray-800 font-medium">{{ dm.sender.username }}</p>
-                            <p class="text-sm text-gray-400 truncate">{{ dm.last_message }}</p>
-                        </div>
-                        <span class="text-xs text-gray-400">{{ dm.timestamp|timesince }} ago</span>
-                    </li>
-                    {% endfor %}
-                </ul>
+{% if direct_messages %}
+<ul class="space-y-3">
+    {% for dm in direct_messages %}
+    <a href="{% url 'chat' dm.room_name %}" class="flex items-center gap-3 p-4 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition">
+        <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+            <span class="text-purple-600 font-bold">
+                {{ dm.other_user.username|first|upper }}
+            </span>
+        </div>
+        <div class="flex-1">
+            <p class="text-gray-800 font-medium">{{ dm.other_user.username }}</p>
+            <p class="text-sm text-gray-400 truncate">
+                {% if dm.last_message %}{{ dm.last_message.content|truncatechars:50 }}{% else %}No messages yet{% endif %}
+            </p>
+        </div>
+        <span class="text-xs text-gray-400">
+            {% if dm.last_message %}{{ dm.last_message.timestamp|timesince }} ago{% endif %}
+        </span>
+    </a>
+    {% endfor %}
+</ul>
                 {% else %}
                 <!-- Empty State -->
                 <div class="flex flex-col items-center justify-center py-16 text-center">
