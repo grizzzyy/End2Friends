@@ -142,39 +142,45 @@
                 <span class="text-gray-700 text-sm nav-text">{{ user.username }}</span>
             </div>
 
-            <!-- Nav Links -->
-            <nav class="flex-1 p-3">
-                <a href="{% url 'dashboard' %}"
-                    class="nav-link {% if '/dashboard/' in request.path %}active{% endif %}">
-                    <span class="material-symbols-outlined flex-shrink-0">dashboard</span>
-                    <span class="nav-text">Dashboard</span>
-                    <span class="tooltip">Dashboard</span>
-                </a>
-                <a href="{% url 'rooms:room_list' %}"
-                    class="nav-link {% if '/rooms/' in request.path %}active{% endif %}">
-                    <span class="material-symbols-outlined flex-shrink-0">groups</span>
-                    <span class="nav-text">Rooms</span>
-                    <span class="tooltip">Rooms</span>
-                </a>
-                <!-- I fixed this from being static to actually going somewhere (yvette) -->
-               <a href="{% url 'messages_page' %}" class="nav-link {% if '/messages/' in request.path %}active{% endif %}">
-               
-                <a href="{% url 'profile' %}" class="nav-link {% if '/profile/' in request.path %}active{% endif %}">
-                    <span class="material-symbols-outlined flex-shrink-0">person</span>
-                    <span class="nav-text">Profile</span>
-                    <span class="tooltip">Profile</span>
-                </a>
-                <a href="{% url 'people' %}" class="nav-link {% if '/people/' in request.path %}active{% endif %}">
-                    <span class="material-symbols-outlined flex-shrink-0">person_search</span>
-                    <span class="nav-text">People</span>
-                    <span class="tooltip">People</span>
-                </a>
-                <a href="#" class="nav-link">
-                    <span class="material-symbols-outlined flex-shrink-0">settings</span>
-                    <span class="nav-text">Settings</span>
-                    <span class="tooltip">Settings</span>
-                </a>
-            </nav>
+          <!-- Nav Links -->
+<nav class="flex-1 p-3">
+    <a href="{% url 'dashboard' %}"
+        class="nav-link {% if '/dashboard/' in request.path %}active{% endif %}">
+        <span class="material-symbols-outlined flex-shrink-0">dashboard</span>
+        <span class="nav-text">Dashboard</span>
+        <span class="tooltip">Dashboard</span>
+    </a>
+    <a href="{% url 'rooms:room_list' %}"
+        class="nav-link {% if '/rooms/' in request.path %}active{% endif %}">
+        <span class="material-symbols-outlined flex-shrink-0">groups</span>
+        <span class="nav-text">Rooms</span>
+        <span class="tooltip">Rooms</span>
+    </a>
+    <a href="{% url 'messages_page' %}"
+        class="nav-link {% if '/messages/' in request.path %}active{% endif %}">
+        <span class="material-symbols-outlined flex-shrink-0">chat</span>
+        <span class="nav-text">Messages</span>
+        <span class="tooltip">Messages</span>
+    </a>
+    <a href="{% url 'profile' %}"
+        class="nav-link {% if '/profile/' in request.path %}active{% endif %}">
+        <span class="material-symbols-outlined flex-shrink-0">person</span>
+        <span class="nav-text">Profile</span>
+        <span class="tooltip">Profile</span>
+    </a>
+    <a href="{% url 'people' %}"
+        class="nav-link {% if '/people/' in request.path %}active{% endif %}">
+        <span class="material-symbols-outlined flex-shrink-0">person_search</span>
+        <span class="nav-text">People</span>
+        <span class="tooltip">People</span>
+    </a>
+    <a href="{% url 'settings_page' %}"
+        class="nav-link {% if '/settings/' in request.path %}active{% endif %}">
+        <span class="material-symbols-outlined flex-shrink-0">settings</span>
+        <span class="nav-text">Settings</span>
+        <span class="tooltip">Settings</span>
+    </a>
+</nav>
 
             <!-- Logout -->
             <div class="p-4 border-t border-purple-100">
