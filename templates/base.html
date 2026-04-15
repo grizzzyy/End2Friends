@@ -24,9 +24,12 @@
             --bg-input:       #f3f4f6;
             --bg-msg-sent:    #7c3aed;
             --bg-msg-recv:    #ffffff;
+            --bg-item:        #f9fafb;
+            --bg-modal:       #ffffff;
 
             --text-primary:   #1f2937;
             --text-secondary: #6b7280;
+            --text-muted:     #9ca3af;
             --text-nav:       #6b7280;
             --text-nav-active:#7c3aed;
             --text-logo:      #7c3aed;
@@ -36,14 +39,18 @@
             --border-main:    #e9d5ff;
             --border-card:    #e5e7eb;
             --border-input:   #d1d5db;
+            --border-modal:   #e5e7eb;
 
             --accent:         #7c3aed;
             --accent-hover:   #6d28d9;
             --accent-light:   #ede9fe;
+            --accent-text:    #7c3aed;
 
             --toggle-bg:      #ede9fe;
             --toggle-icon:    #7c3aed;
             --sidebar-btn-bg: #ffffff;
+
+            --shadow-card:    0 1px 3px rgba(0,0,0,0.08);
         }
 
         /* ─── DARK THEME ─── */
@@ -56,9 +63,12 @@
             --bg-input:       #252533;
             --bg-msg-sent:    #6d28d9;
             --bg-msg-recv:    #252533;
+            --bg-item:        #252533;
+            --bg-modal:       #1e1e2a;
 
             --text-primary:   #f0eeff;
             --text-secondary: #9d9db8;
+            --text-muted:     #6b6b8a;
             --text-nav:       #9d9db8;
             --text-nav-active:#c4b5fd;
             --text-logo:      #c4b5fd;
@@ -68,14 +78,18 @@
             --border-main:    #2e2e45;
             --border-card:    #2e2e45;
             --border-input:   #3a3a55;
+            --border-modal:   #3a3a55;
 
             --accent:         #8b5cf6;
             --accent-hover:   #7c3aed;
             --accent-light:   #2d2045;
+            --accent-text:    #c4b5fd;
 
             --toggle-bg:      #2d2045;
             --toggle-icon:    #c4b5fd;
             --sidebar-btn-bg: #1e1e2a;
+
+            --shadow-card:    0 1px 3px rgba(0,0,0,0.4);
         }
 
         /* ─── BASE STYLES using variables ─── */
@@ -86,6 +100,118 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
+        /* ─── THEMED UTILITY CLASSES ─── */
+        /* Use these in child templates instead of hardcoded Tailwind color classes */
+
+        .t-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-card);
+            border-radius: 12px;
+            box-shadow: var(--shadow-card);
+        }
+
+        .t-card-inner {
+            background: var(--bg-item);
+            border: 1px solid var(--border-card);
+            border-radius: 10px;
+        }
+
+        .t-text-primary   { color: var(--text-primary); }
+        .t-text-secondary { color: var(--text-secondary); }
+        .t-text-muted     { color: var(--text-muted); }
+        .t-text-accent    { color: var(--accent-text); }
+
+        .t-input {
+            background: var(--bg-input);
+            border: 1px solid var(--border-input);
+            border-radius: 8px;
+            padding: 8px 12px;
+            color: var(--text-primary);
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+        .t-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px var(--accent-light);
+        }
+
+        .t-btn-primary {
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: "Varela Round", sans-serif;
+            font-size: 14px;
+            transition: background 0.2s, transform 0.15s;
+        }
+        .t-btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+        .t-btn-secondary {
+            background: var(--bg-nav-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-card);
+            border-radius: 8px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: "Varela Round", sans-serif;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .t-btn-secondary:hover { background: var(--bg-nav-active); }
+
+        .t-btn-ghost {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-input);
+            border-radius: 20px;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-family: "Varela Round", sans-serif;
+            font-size: 13px;
+            transition: background 0.2s;
+        }
+        .t-btn-ghost:hover { background: var(--accent-light); color: var(--accent-text); }
+
+        .t-badge {
+            background: var(--accent);
+            color: #fff;
+            border-radius: 9999px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .t-border-top    { border-top: 1px solid var(--border-main); }
+        .t-border-bottom { border-bottom: 1px solid var(--border-main); }
+
+        .t-modal-overlay {
+            background: rgba(0,0,0,0.55);
+        }
+        .t-modal {
+            background: var(--bg-modal);
+            border: 1px solid var(--border-modal);
+            border-radius: 14px;
+        }
+
+        .t-list-item {
+            background: var(--bg-item);
+            border-radius: 10px;
+            transition: background 0.15s;
+        }
+        .t-list-item:hover { background: var(--accent-light); }
+
+        .t-accent-icon-wrap {
+            background: var(--accent-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ─── SIDEBAR ─── */
         aside {
             background-color: var(--bg-sidebar) !important;
             border-right: 1px solid var(--border-main);
@@ -177,29 +303,13 @@
 
         #theme-toggle:hover { filter: brightness(0.95); }
 
-        /* ─── LOGO + BORDERS ─── */
-        .sidebar-logo {
-            color: var(--text-logo);
-            border-bottom: 1px solid var(--border-main);
-        }
+        .sidebar-logo   { color: var(--text-logo); border-bottom: 1px solid var(--border-main); }
+        .sidebar-user   { border-bottom: 1px solid var(--border-main); }
+        .sidebar-bottom { border-top: 1px solid var(--border-main); }
 
-        .sidebar-user {
-            border-bottom: 1px solid var(--border-main);
-        }
-
-        .sidebar-bottom {
-            border-top: 1px solid var(--border-main);
-        }
-
-        /* ─── CARDS ─── */
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-card);
-            border-radius: 12px;
-        }
-
-        /* ─── SMOOTH TRANSITIONS on common elements ─── */
-        aside, .nav-link, .card, input, button, textarea {
+        /* ─── SMOOTH TRANSITIONS ─── */
+        aside, .nav-link, .t-card, .t-card-inner, .t-list-item,
+        input, button, textarea, select {
             transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
         }
     </style>
@@ -229,12 +339,12 @@
                     {% if user.userprofile.avatar %}
                     <img class="rounded-full w-9 h-9 object-cover flex-shrink-0" src="{{ user.userprofile.avatar.url }}" alt="Avatar">
                     {% else %}
-                    <div class="flex items-center justify-center rounded-full w-9 h-9 flex-shrink-0" style="background: var(--accent-light);">
+                    <div class="flex items-center justify-center rounded-full w-9 h-9 flex-shrink-0 t-accent-icon-wrap" style="width:36px;height:36px;">
                         <span class="material-symbols-outlined" style="color: var(--accent);">person</span>
                     </div>
                     {% endif %}
                 </div>
-                <span class="text-sm nav-text" style="color: var(--text-primary);">{{ user.username }}</span>
+                <span class="text-sm nav-text t-text-primary">{{ user.username }}</span>
             </div>
 
             <!-- Nav Links -->

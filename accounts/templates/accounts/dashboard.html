@@ -2,35 +2,34 @@
 {% block title %}Dashboard{% endblock %}
 {% block content %}
 
-<!-- Main Content -->
-<main class="flex-1 p-8">
+<main class="flex-1 p-8" style="background: var(--bg-page);">
+
     <!-- Greeting Header -->
     <header class="mb-8">
-        <p class="text-sm text-purple-500 mb-1">{% now "l, F j, Y" %}</p>
-        <h1 class="text-2xl font-bold text-gray-800">Welcome back, {{ user.username }}</h1>
-        <p class="text-gray-500 mt-1">Stay focused. Finish strong.</p>
+        <p class="text-sm t-text-accent mb-1">{% now "l, F j, Y" %}</p>
+        <h1 class="text-2xl font-bold t-text-primary">Welcome back, {{ user.username }}</h1>
+        <p class="t-text-secondary mt-1">Stay focused. Finish strong.</p>
     </header>
 
     <!-- Tasks & Reminders Row -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         <!-- Today's Tasks Card -->
-        <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">Today's Tasks</h2>
+        <div class="t-card p-6">
+            <h2 class="text-lg font-bold t-text-primary mb-4">Today's Tasks</h2>
 
             <ul class="space-y-3">
                 {% for task in tasks %}
-                <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <input type="checkbox" class="w-4 h-4 accent-purple-600" {% if task.completed %}checked{% endif %}>
-                    <span
-                        class="w-2 h-2 rounded-full {% if task.priority == 'high' %}bg-red-500{% elif task.priority == 'medium' %}bg-yellow-500{% else %}bg-green-500{% endif %}"></span>
+                <li class="t-list-item flex items-center gap-3 p-3">
+                    <input type="checkbox" class="w-4 h-4" style="accent-color: var(--accent);" {% if task.completed %}checked{% endif %}>
+                    <span class="w-2 h-2 rounded-full {% if task.priority == 'high' %}bg-red-500{% elif task.priority == 'medium' %}bg-yellow-500{% else %}bg-green-500{% endif %}"></span>
                     <div class="flex-1">
-                        <p class="text-gray-800 text-sm">{{ task.title }}</p>
-                        <p class="text-xs text-gray-400">{{ task.channel }} · Due {{ task.due_date|date:"M j" }}</p>
+                        <p class="t-text-primary text-sm">{{ task.title }}</p>
+                        <p class="t-text-muted text-xs">{{ task.channel }} · Due {{ task.due_date|date:"M j" }}</p>
                     </div>
                 </li>
                 {% empty %}
-                <li class="text-center text-gray-400 text-sm py-4">No tasks yet. You're all caught up!</li>
+                <li class="text-center t-text-muted text-sm py-4">No tasks yet. You're all caught up!</li>
                 {% endfor %}
             </ul>
 
@@ -40,33 +39,30 @@
                 {{ form.due_date }}
                 {{ form.priority }}
                 {{ form.channel }}
-                <button type="submit"
-                    class="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">+ Add
-                    Task</button>
+                <button type="submit" class="t-btn-primary text-sm">+ Add Task</button>
             </form>
         </div>
 
         <!-- Upcoming Reminders Card -->
-        <div class="bg-white rounded-xl shadow p-6">
+        <div class="t-card p-6">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-bold text-gray-800">Upcoming Reminders</h2>
-                <a href="#" class="text-sm text-purple-600 hover:text-purple-800">View all</a>
+                <h2 class="text-lg font-bold t-text-primary">Upcoming Reminders</h2>
+                <a href="#" class="text-sm t-text-accent hover:underline">View all</a>
             </div>
 
             <ul class="space-y-3">
                 {% for reminder in reminders %}
-                <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <span class="material-symbols-outlined text-purple-600 text-sm">schedule</span>
+                <li class="t-list-item flex items-center gap-3 p-3">
+                    <div class="t-accent-icon-wrap w-8 h-8 flex-shrink-0">
+                        <span class="material-symbols-outlined text-sm" style="color: var(--accent);">schedule</span>
                     </div>
                     <div class="flex-1">
-                        <p class="text-gray-800 text-sm font-medium">{{ reminder.title }}</p>
-                        <p class="text-xs text-gray-400">{{ reminder.remind_at|date:"M j, g:i A" }} · {{
-                            reminder.channel }}</p>
+                        <p class="t-text-primary text-sm font-medium">{{ reminder.title }}</p>
+                        <p class="t-text-muted text-xs">{{ reminder.remind_at|date:"M j, g:i A" }} · {{ reminder.channel }}</p>
                     </div>
                 </li>
                 {% empty %}
-                <li class="text-center text-gray-400 text-sm py-4">No upcoming reminders.</li>
+                <li class="text-center t-text-muted text-sm py-4">No upcoming reminders.</li>
                 {% endfor %}
             </ul>
         </div>
@@ -74,81 +70,66 @@
     </div>
 
     <!-- Active Rooms Card -->
-    <div class="bg-white rounded-xl shadow p-6 mt-6">
+    <div class="t-card p-6 mt-6">
         <div class="flex items-center justify-between mb-4">
-            <h2 class="text-lg font-bold text-gray-800">Active Rooms</h2>
-            <a href="#" class="text-sm text-purple-600 hover:text-purple-800">View all</a>
+            <h2 class="text-lg font-bold t-text-primary">Active Rooms</h2>
+            <a href="#" class="text-sm t-text-accent hover:underline">View all</a>
         </div>
 
         <ul class="space-y-3">
             {% for room in study_rooms %}
             <li>
                 <a href="{% url 'rooms:room_chat' room.id %}"
-                    class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-purple-50 cursor-pointer transition">
-                    <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
-                        <span class="material-symbols-outlined text-purple-600 text-sm">chat</span>
+                    class="t-list-item flex items-center gap-3 p-3 cursor-pointer">
+                    <div class="t-accent-icon-wrap w-8 h-8 flex-shrink-0">
+                        <span class="material-symbols-outlined text-sm" style="color: var(--accent);">chat</span>
                     </div>
                     <div class="flex-1">
-                        <p class="text-gray-800 text-sm font-medium">#{{ room.name }}</p>
-                        <!-- <p class="text-xs text-gray-400">Last active {{ channel.last_activity|timesince }} ago</p> -->
+                        <p class="t-text-primary text-sm font-medium">#{{ room.name }}</p>
                     </div>
                     {% if room.unread_count > 0 %}
-                    <span class="bg-purple-600 text-white text-xs font-bold px-2 py-1 rounded-full">{{
-                        channel.unread_count }}</span>
+                    <span class="t-badge">{{ room.unread_count }}</span>
                     {% endif %}
                 </a>
             </li>
             {% empty %}
-            <li class="text-center text-gray-400 text-sm py-4">No rooms joined yet.</li>
+            <li class="text-center t-text-muted text-sm py-4">No rooms joined yet.</li>
             {% endfor %}
         </ul>
 
-        <!-- Room action buttons -->
         <div class="flex gap-3 mt-4">
-            <a href="{% url 'rooms:create_room' %}"
-                class="inline-block px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700">
-                + Create A Room
-            </a>
-            <button onclick="openJoinModal()"
-                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300">
-                Join Room
-            </button>
+            <a href="{% url 'rooms:create_room' %}" class="t-btn-primary text-sm">+ Create A Room</a>
+            <button onclick="openJoinModal()" class="t-btn-secondary text-sm">Join Room</button>
         </div>
     </div>
 
     <!-- Pomodoro Status Card -->
-    <div class="bg-white rounded-xl shadow p-6 mt-6 max-w-md mx-auto">
-        <h2 class="text-lg font-bold text-gray-800 mb-4 text-center">Pomodoro Timer</h2>
+    <div class="t-card p-6 mt-6 max-w-md mx-auto">
+        <h2 class="text-lg font-bold t-text-primary mb-4 text-center">Pomodoro Timer</h2>
 
         <div class="flex flex-col items-center gap-4">
             <!-- Circular Indicator -->
             <div class="relative w-28 h-28">
                 <svg class="w-28 h-28 transform -rotate-90">
-                    <circle cx="56" cy="56" r="50" stroke="#e9d5ff" stroke-width="8" fill="none"></circle>
-                    <circle id="pomo-progress" cx="56" cy="56" r="50" stroke="#a855f7" stroke-width="8" fill="none"
-                        stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"></circle>
+                    <circle cx="56" cy="56" r="50" stroke="var(--accent-light)" stroke-width="8" fill="none"></circle>
+                    <circle id="pomo-progress" cx="56" cy="56" r="50" stroke="var(--accent)" stroke-width="8"
+                        fill="none" stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"></circle>
                 </svg>
                 <div class="absolute inset-0 flex items-center justify-center">
-                    <span id="pomo-time" class="text-lg font-bold text-gray-700">25:00</span>
+                    <span id="pomo-time" class="text-lg font-bold t-text-primary">25:00</span>
                 </div>
             </div>
 
             <!-- Status -->
             <div class="text-center">
-                <p class="text-sm text-gray-500 mb-1">Status</p>
-                <p id="pomo-status" class="text-gray-800 font-medium">Not started</p>
+                <p class="text-sm t-text-secondary mb-1">Status</p>
+                <p id="pomo-status" class="t-text-primary font-medium">Not started</p>
             </div>
 
             <!-- Buttons -->
             <div class="flex gap-2">
-                <button id="pomo-btn" onclick="togglePomodoro()"
-                    class="px-5 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 transition">
-                    Start
-                </button>
-                <button id="pomo-reset" onclick="resetPomodoro()"
-                    class="px-5 py-2 bg-gray-200 text-gray-600 rounded-lg text-sm hover:bg-gray-300 transition">
-                    Reset
-                </button>
+                <button id="pomo-btn" onclick="togglePomodoro()" class="t-btn-primary px-5 py-2 text-sm">Start</button>
+                <button id="pomo-reset" onclick="resetPomodoro()" class="t-btn-secondary px-5 py-2 text-sm">Reset</button>
             </div>
         </div>
     </div>
@@ -157,54 +138,51 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
 
         <!-- Recent Activity Card -->
-        <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">Recent Activity</h2>
+        <div class="t-card p-6">
+            <h2 class="text-lg font-bold t-text-primary mb-4">Recent Activity</h2>
 
             <ul class="space-y-3">
                 {% for activity in activities %}
-                <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                <li class="t-list-item flex items-center gap-3 p-3">
+                    <div class="t-accent-icon-wrap w-8 h-8 flex-shrink-0">
                         {% if activity.activity_type == 'mention' %}
-                        <span class="material-symbols-outlined text-purple-600 text-sm">person</span>
+                        <span class="material-symbols-outlined text-sm" style="color: var(--accent);">person</span>
                         {% elif activity.activity_type == 'file' %}
-                        <span class="material-symbols-outlined text-purple-600 text-sm">draft</span>
+                        <span class="material-symbols-outlined text-sm" style="color: var(--accent);">draft</span>
                         {% else %}
-                        <span class="material-symbols-outlined text-purple-600 text-sm">chat</span>
+                        <span class="material-symbols-outlined text-sm" style="color: var(--accent);">chat</span>
                         {% endif %}
                     </div>
                     <div class="flex-1">
                         {% if activity.activity_type == 'mention' %}
-                        <p class="text-gray-800 text-sm">You were mentioned in <span class="font-medium">{{
-                                activity.channel }}</span></p>
+                        <p class="t-text-primary text-sm">You were mentioned in <span class="font-medium">{{ activity.channel }}</span></p>
                         {% elif activity.activity_type == 'file' %}
-                        <p class="text-gray-800 text-sm">New file uploaded in <span class="font-medium">{{
-                                activity.channel }}</span></p>
+                        <p class="t-text-primary text-sm">New file uploaded in <span class="font-medium">{{ activity.channel }}</span></p>
                         {% else %}
-                        <p class="text-gray-800 text-sm">{{ activity.count }} new messages in <span
-                                class="font-medium">{{ activity.channel }}</span></p>
+                        <p class="t-text-primary text-sm">{{ activity.count }} new messages in <span class="font-medium">{{ activity.channel }}</span></p>
                         {% endif %}
-                        <p class="text-xs text-gray-400">{{ activity.created_at|timesince }} ago</p>
+                        <p class="t-text-muted text-xs">{{ activity.created_at|timesince }} ago</p>
                     </div>
                 </li>
                 {% empty %}
-                <li class="text-center text-gray-400 text-sm py-4">No recent activity.</li>
+                <li class="text-center t-text-muted text-sm py-4">No recent activity.</li>
                 {% endfor %}
             </ul>
         </div>
 
         <!-- Study Room Status Card -->
-        <div class="bg-white rounded-xl shadow p-6">
-            <h2 class="text-lg font-bold text-gray-800 mb-4">Study Rooms</h2>
+        <div class="t-card p-6">
+            <h2 class="text-lg font-bold t-text-primary mb-4">Study Rooms</h2>
 
             <ul class="space-y-3">
                 {% for room in study_rooms %}
-                <li class="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div class="w-8 h-8 bg-purple-200 rounded-full flex items-center justify-center">
-                        <span class="material-symbols-outlined text-purple-600 text-sm">groups</span>
+                <li class="t-list-item flex items-center gap-3 p-3">
+                    <div class="t-accent-icon-wrap w-8 h-8 flex-shrink-0">
+                        <span class="material-symbols-outlined text-sm" style="color: var(--accent);">groups</span>
                     </div>
                     <div class="flex-1">
-                        <p class="text-gray-800 text-sm font-medium">{{ room.name }}</p>
-                        <p class="text-xs text-gray-400">
+                        <p class="t-text-primary text-sm font-medium">{{ room.name }}</p>
+                        <p class="t-text-muted text-xs">
                             {% if room.active_count > 0 %}
                             {{ room.active_count }} member{{ room.active_count|pluralize }} studying now
                             {% else %}
@@ -212,11 +190,10 @@
                             {% endif %}
                         </p>
                     </div>
-                    <button
-                        class="px-3 py-1 bg-purple-600 text-white rounded-lg text-xs hover:bg-purple-700 transition">Join</button>
+                    <button class="t-btn-primary text-xs px-3 py-1">Join</button>
                 </li>
                 {% empty %}
-                <li class="text-center text-gray-400 text-sm py-4">No study rooms joined.</li>
+                <li class="text-center t-text-muted text-sm py-4">No study rooms joined.</li>
                 {% endfor %}
             </ul>
         </div>
@@ -224,31 +201,24 @@
     </div>
 
     <!-- Join Room Modal -->
-    <div id="joinModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
-        <div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-4 w-full">
+    <div id="joinModal" class="fixed inset-0 t-modal-overlay hidden items-center justify-center z-50">
+        <div class="t-modal shadow-lg p-6 max-w-md mx-4 w-full">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                    <span class="material-symbols-outlined text-purple-600">key</span>
+                <div class="t-accent-icon-wrap w-10 h-10">
+                    <span class="material-symbols-outlined" style="color: var(--accent);">key</span>
                 </div>
-                <h2 class="text-lg font-bold text-gray-800">Join a Room</h2>
+                <h2 class="text-lg font-bold t-text-primary">Join a Room</h2>
             </div>
-            <p class="text-gray-600 mb-4">Enter the invite code to join an existing room.</p>
+            <p class="t-text-secondary mb-4">Enter the invite code to join an existing room.</p>
             <form id="joinRoomForm" class="space-y-4">
                 <div>
-                    <label for="room_code" class="block text-sm font-medium text-gray-700 mb-1">Room Code</label>
-                    <input type="text" id="room_code" name="room_code" required
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    <label for="room_code" class="block text-sm font-medium t-text-secondary mb-1">Room Code</label>
+                    <input type="text" id="room_code" name="room_code" required class="t-input"
                         placeholder="e.g. a1b2c3d4" maxlength="20">
                 </div>
                 <div class="flex gap-3 justify-end">
-                    <button type="button" onclick="closeJoinModal()"
-                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                        Cancel
-                    </button>
-                    <button type="submit"
-                        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
-                        Join Room
-                    </button>
+                    <button type="button" onclick="closeJoinModal()" class="t-btn-secondary">Cancel</button>
+                    <button type="submit" class="t-btn-primary">Join Room</button>
                 </div>
             </form>
         </div>
@@ -278,11 +248,9 @@
             const progress = timeLeft / totalDuration;
             progressCircle.style.strokeDashoffset = circumference * progress;
 
-            if (isBreak) {
-                progressCircle.style.stroke = '#f5b4e0ff';
-            } else {
-                progressCircle.style.stroke = '#a855f7';
-            }
+            const root = document.documentElement;
+            const accentColor = getComputedStyle(root).getPropertyValue('--accent').trim();
+            progressCircle.style.stroke = isBreak ? '#f5b4e0' : accentColor;
         }
 
         function updateStatus() {
@@ -344,7 +312,6 @@
         updateDisplay();
         updateStatus();
 
-        // Join Room Modal Functions
         function openJoinModal() {
             document.getElementById('joinModal').classList.remove('hidden');
             document.getElementById('joinModal').classList.add('flex');
@@ -357,7 +324,6 @@
             document.getElementById('room_code').value = '';
         }
 
-        // Handle form submit - redirect to join URL
         document.getElementById('joinRoomForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const code = document.getElementById('room_code').value.trim();
