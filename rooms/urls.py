@@ -21,6 +21,7 @@ urlpatterns = [
 
     path('<int:room_id>/delete/', views.delete_room, name='delete_room'),
 
-   
     path('<int:room_id>/channels/create/', views.create_channel, name='create_channel'),
+    path('<int:room_id>/channels/<int:channel_id>/', views.channel_chat, name='channel_chat'),
+    path('<int:room_id>/channels/<int:channel_id>/delete/', views.delete_channel, name='delete_channel'),
 ]

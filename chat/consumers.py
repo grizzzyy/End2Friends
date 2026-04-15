@@ -105,3 +105,106 @@ class ChatConsumer(AsyncWebsocketConsumer):
         from .models import Conversation
 
         return Conversation.objects.filter(room_id=room_id, participants=user).exists()
+
+
+class ChannelConsumer(AsyncWebsocketConsumer):
+    """WebSocket consumer for room channel chat."""
+
+    async def connect(self):
+        try:
+            self.channel_id = self.scope["url_route"]["kwargs"]["channel_id"]
+            self.room_group_name = f"channel_{self.channel_id}"
+
+            user = self.scope["user"]
+            if not user.is_authenticated:
+                await self.close()
+                return
+
+            # Check if user is member of the room that owns this channel
+            is_member = await self.user_in_channel_room(user, self.channel_id)
+            if not is_member:
+                await self.close()
+                return
+
+            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            await self.accept()
+            print(f"[WS Channel] Connected: channel={self.channel_id} | User: {user}")
+
+        except Exception as e:
+            print(f"[WS Channel ERROR] Connect failed: {e}")
+            traceback.print_exc()
+            await self.close()
+
+    async def disconnect(self, close_code):
+        print(f"[WS Channel] Disconnected: code={close_code}")
+        try:
+            await self.channel_layer.group_discard(
+                self.room_group_name, self.channel_name
+            )
+        except Exception as e:
+            print(f"[WS Channel ERROR] Disconnect error: {e}")
+
+    async def receive(self, text_data=None, bytes_data=None):
+        try:
+            data = json.loads(text_data)
+            message = data.get("message", "").strip()
+            user = self.scope["user"]
+
+            print(f"[WS Channel] Message from {user}: {message}")
+
+            if not message or not user.is_authenticated:
+                return
+
+            await self.save_channel_message(user, self.channel_id, message)
+
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    "type": "chat_message",
+                    "message": message,
+                    "user": user.username,
+                },
+            )
+
+        except Exception as e:
+            print(f"[WS Channel ERROR] Receive failed: {e}")
+            traceback.print_exc()
+
+    async def chat_message(self, event):
+        try:
+            await self.send(
+                text_data=json.dumps(
+                    {
+                        "message": event["message"],
+                        "user": event["user"],
+                    }
+                )
+            )
+        except Exception as e:
+            print(f"[WS Channel ERROR] Send failed: {e}")
+
+    @database_sync_to_async
+    def user_in_channel_room(self, user, channel_id):
+        from rooms.models import Channel, RoomMembership
+
+        try:
+            channel = Channel.objects.get(id=channel_id)
+            return RoomMembership.objects.filter(user=user, room=channel.room).exists()
+        except Channel.DoesNotExist:
+            return False
+
+    @database_sync_to_async
+    def save_channel_message(self, user, channel_id, content):
+        from rooms.models import Channel, Message
+
+        try:
+            channel = Channel.objects.get(id=channel_id)
+            msg = Message.objects.create(
+                channel=channel, user=user, content=content
+            )
+            print(f"[WS Channel] Saved message id={msg.id}")
+        except Channel.DoesNotExist:
+            print(f"[WS Channel ERROR] Channel not found: {channel_id}")
+        except Exception as e:
+            print(f"[WS Channel ERROR] Save failed: {e}")
+            traceback.print_exc()

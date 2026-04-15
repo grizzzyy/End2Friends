@@ -6,18 +6,19 @@ from .models import StudyRoom, RoomMembership, RoomInvite
 User = get_user_model()
 
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import StudyRoom, RoomMembership, RoomInvite
+from .models import StudyRoom, RoomMembership, RoomInvite, Channel, Message
 
+@login_required
 def create_channel(request, room_id):
-    room = get_object_or_404(Room, id=room_id)
+    room = get_object_or_404(StudyRoom, id=room_id)
 
     if request.method == "POST":
         name = request.POST.get("name")
         if name:
-            Channel.objects.create(room=room, name=name)
-            return redirect('rooms:room_detail', room_id=room.id)
+            channel = Channel.objects.create(room=room, name=name, created_by=request.user)
+            return redirect('rooms:channel_chat', room_id=room.id, channel_id=channel.id)
 
-    return render(request, 'rooms/create_channel.html', {"room": room})
+    return redirect('rooms:room_chat', room_id=room_id)
 
 
 
@@ -177,11 +178,14 @@ def room_chat(request, room_id):
     members = RoomMembership.objects.filter(
         room=room
     ).select_related('user')
+    
+    channels = Channel.objects.filter(room=room)
 
     return render(request, 'rooms/chat.html', {
         'room': room,
         'members': members,
         'membership': membership,
+        'channels': channels,
     })
 
     
@@ -213,6 +217,55 @@ def delete_room(request, room_id):
     
     if request.method == 'POST':
         room.delete()
-        return redirect('dashboard')
+        return redirect('rooms:room_list')
     
     return redirect('rooms:room_detail', room_id=room_id)
+
+
+@login_required
+def channel_chat(request, room_id, channel_id):
+    room = get_object_or_404(StudyRoom, id=room_id)
+    channel = get_object_or_404(Channel, id=channel_id, room=room)
+    
+    membership = RoomMembership.objects.filter(
+        user=request.user, room=room
+    ).first()
+    
+    if not membership and room.is_private:
+        return redirect('rooms:room_list')
+    
+    channels = Channel.objects.filter(room=room)
+    
+    # Get messages for this channel
+    channel_messages = Message.objects.filter(channel=channel)
+    
+    return render(request, 'rooms/channel_chat.html', {
+        'room': room,
+        'channel': channel,
+        'channels': channels,
+        'membership': membership,
+        'channel_messages': channel_messages,
+    })
+
+
+@login_required
+def delete_channel(request, room_id, channel_id):
+    room = get_object_or_404(StudyRoom, id=room_id)
+    channel = get_object_or_404(Channel, id=channel_id, room=room)
+    
+    membership = RoomMembership.objects.filter(
+        user=request.user, room=room, role='owner'
+    ).first()
+    
+    if not membership:
+        return redirect('rooms:room_chat', room_id=room_id)
+    
+    if request.method == 'POST':
+        channel.delete()
+        # Redirect to first available channel or room chat
+        first_channel = Channel.objects.filter(room=room).first()
+        if first_channel:
+            return redirect('rooms:channel_chat', room_id=room_id, channel_id=first_channel.id)
+        return redirect('rooms:room_chat', room_id=room_id)
+    
+    return redirect('rooms:channel_chat', room_id=room_id, channel_id=channel_id)

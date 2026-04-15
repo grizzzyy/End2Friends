@@ -1,6 +1,11 @@
 from django.core.exceptions import ValidationError
 import os
-import magic
+
+try:
+    import magic
+    HAS_MAGIC = True
+except ImportError:
+    HAS_MAGIC = False
 
 ALLOWED_MIME_TYPES = {
     'application/pdf',
@@ -33,8 +38,9 @@ def validate_uploaded_file(file):
     if ext not in ALLOWED_EXTENSIONS:
         raise ValidationError(f'File type {ext} is not allowed.')
 
-    # Check actual file content using python-magic
-    mime = magic.from_buffer(file.read(2048), mime=True)
-    file.seek(0)  # reset file pointer after reading
-    if mime not in ALLOWED_MIME_TYPES:
-        raise ValidationError(f'File content type {mime} is not allowed.')
+    # Check actual file content using python-magic (if available)
+    if HAS_MAGIC:
+        mime = magic.from_buffer(file.read(2048), mime=True)
+        file.seek(0)  # reset file pointer after reading
+        if mime not in ALLOWED_MIME_TYPES:
+            raise ValidationError(f'File content type {mime} is not allowed.')
