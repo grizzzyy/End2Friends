@@ -12,6 +12,7 @@ import chat.routing
 
 
 class MediaFileMiddleware:
+    """Serve /media/ files without interfering with WebSockets."""
     def __init__(self, app):
         self.app = app
         self.media_url = settings.MEDIA_URL
@@ -22,6 +23,7 @@ class MediaFileMiddleware:
         if scope["type"] == "http" and scope["path"].startswith(self.media_url):
             await self._serve_media(scope, receive, send)
         else:
+            # Pass WebSocket scopes straight through
             await self.app(scope, receive, send)
 
     async def _serve_media(self, scope, receive, send):
