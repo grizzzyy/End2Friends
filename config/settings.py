@@ -37,7 +37,6 @@ CSRF_COOKIE_SAMESITE = 'None'
 # APPS
 # ---------------------------------------------------------
 INSTALLED_APPS = [
-    'daphne',
     'core',
     'accounts.apps.AccountsConfig',
     'django.contrib.admin',
@@ -55,10 +54,9 @@ INSTALLED_APPS = [
 # ---------------------------------------------------------
 # MIDDLEWARE
 # ---------------------------------------------------------
-# IMPORTANT: WhiteNoise MUST be first so it can serve /media/ and /static/
 MIDDLEWARE = [
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'django.middleware.security.SecurityMiddleware',
+    'django.middleware.security.SecurityMiddleware',  
+    'whitenoise.middleware.WhiteNoiseMiddleware',      
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -162,11 +160,6 @@ if os.environ.get("RENDER"):
     MEDIA_ROOT = '/opt/render/project/src/media'
 else:
     MEDIA_ROOT = BASE_DIR / 'media'
-
-# WhiteNoise: serve media files correctly
-WHITENOISE_MEDIA_PREFIX = MEDIA_URL
-WHITENOISE_ALLOW_ALL_ORIGINS = True
-
 
 # ---------------------------------------------------------
 # CUSTOM USER MODEL

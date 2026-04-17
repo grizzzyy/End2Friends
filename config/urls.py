@@ -11,5 +11,3 @@ urlpatterns = [
     path('rooms/', include('rooms.urls', namespace='rooms')),
 ]
 
-# Serve media files (only works when WhiteNoise is configured for media)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
