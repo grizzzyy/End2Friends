@@ -67,10 +67,10 @@ class MediaFileMiddleware:
         await send({"type": "http.response.body", "body": b"Not Found"})
 
 
-# Create Django ASGI app
+# Django ASGI app
 django_asgi_app = get_asgi_application()
 
-# Wrap ONLY the HTTP app with media middleware
+# Wrap ONLY the HTTP app
 http_app = MediaFileMiddleware(django_asgi_app)
 
 # Final ASGI application
