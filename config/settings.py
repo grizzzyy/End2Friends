@@ -163,9 +163,10 @@ if os.environ.get("RENDER"):
 else:
     MEDIA_ROOT = BASE_DIR / 'media'
 
-# REQUIRED FOR DAPHNE + WHITENOISE TO SERVE MEDIA
-WHITENOISE_ROOT = MEDIA_ROOT
+# WhiteNoise: serve media files correctly
+WHITENOISE_MEDIA_PREFIX = MEDIA_URL
 WHITENOISE_ALLOW_ALL_ORIGINS = True
+
 
 # ---------------------------------------------------------
 # CUSTOM USER MODEL
