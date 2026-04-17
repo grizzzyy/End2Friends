@@ -1,28 +1,23 @@
 """
 Django settings for config project.
-
 """
-# makes django read our .env file
+
 from dotenv import load_dotenv
 import os
 import dj_database_url
+from pathlib import Path
 
 load_dotenv()
 
-from pathlib import Path
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# ---------------------------------------------------------
+# BASE DIR
+# ---------------------------------------------------------
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
+# ---------------------------------------------------------
+# SECURITY
+# ---------------------------------------------------------
 SECRET_KEY = os.getenv("SECRET_KEY", "fallback-only-for-local-dev")
-
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
@@ -38,12 +33,12 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SAMESITE = 'None'
 
-
-# Application definition
-
+# ---------------------------------------------------------
+# APPS
+# ---------------------------------------------------------
 INSTALLED_APPS = [
     'daphne',
-    'core', # landing page App/Welcome page
+    'core',
     'accounts.apps.AccountsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -53,14 +48,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'chat.apps.MessagesConfig',
     'rooms',
-    "channels",     #  Django Channels (library)
-    "groups",       #  Our model for channels
-
+    "channels",
+    "groups",
 ]
 
+# ---------------------------------------------------------
+# MIDDLEWARE
+# ---------------------------------------------------------
+# IMPORTANT: WhiteNoise MUST be first so it can serve /media/ and /static/
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -69,12 +67,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# ---------------------------------------------------------
+# TEMPLATES
+# ---------------------------------------------------------
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],  # project-level templates directory
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -86,34 +87,26 @@ TEMPLATES = [
     },
 ]
 
-#WSGI_APPLICATION = 'config.wsgi.application' # we won't be using this
 # ---------------------------------------------------------
-# CHANNELS ------------------------------------------------
+# CHANNELS / ASGI
 # ---------------------------------------------------------
-# Point Django at the ASGI app instead of WSGI
 ASGI_APPLICATION = 'config.asgi.application'
 
-# Channel layer - use Redis in production, in-memory for local development
 if DEBUG:
     CHANNEL_LAYERS = {
-        "default": {
-            "BACKEND": "channels.layers.InMemoryChannelLayer"
-        },
+        "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"},
     }
 elif os.getenv("REDIS_URL"):
     CHANNEL_LAYERS = {
         "default": {
             "BACKEND": "channels_redis.core.RedisChannelLayer",
-            "CONFIG": {
-                "hosts": [os.getenv("REDIS_URL")],
-            },
+            "CONFIG": {"hosts": [os.getenv("REDIS_URL")]},
         },
     }
 
-# Database
-# https://docs.djangoproject.com/en/6.0/ref/settings/#databases
-
-# Switch the database to use the DATABASE_URL env var
+# ---------------------------------------------------------
+# DATABASE
+# ---------------------------------------------------------
 DATABASES = {
     "default": dj_database_url.config(
         default=os.getenv("DATABASE_URL"),
@@ -122,61 +115,47 @@ DATABASES = {
     )
 }
 
-# Caches
-# https://docs.djangoproject.com/en/6.0/topics/cache/
-# Update cache block to use
+# ---------------------------------------------------------
+# CACHE
+# ---------------------------------------------------------
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": os.getenv("REDIS_URL"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
+        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
     }
 }
 
-# Password validation
-# https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
-
+# ---------------------------------------------------------
+# PASSWORD VALIDATION
+# ---------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/6.0/topics/i18n/
-
+# ---------------------------------------------------------
+# INTERNATIONALIZATION
+# ---------------------------------------------------------
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
-
-STATIC_URL = 'static/'
+# ---------------------------------------------------------
+# STATIC FILES
+# ---------------------------------------------------------
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / 'staticfiles' 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-
-# Media files (user uploads)
+# ---------------------------------------------------------
+# MEDIA FILES (USER UPLOADS)
+# ---------------------------------------------------------
 MEDIA_URL = '/media/'
 
 if os.environ.get("RENDER"):
@@ -184,11 +163,16 @@ if os.environ.get("RENDER"):
 else:
     MEDIA_ROOT = BASE_DIR / 'media'
 
+# REQUIRED FOR DAPHNE + WHITENOISE TO SERVE MEDIA
+WHITENOISE_ROOT = MEDIA_ROOT
+WHITENOISE_ALLOW_ALL_ORIGINS = True
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# implements custom user model we created
+# ---------------------------------------------------------
+# CUSTOM USER MODEL
+# ---------------------------------------------------------
 AUTH_USER_MODEL = 'accounts.User'
+
+# ---------------------------------------------------------
+# DEFAULT PRIMARY KEY
+# ---------------------------------------------------------
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
