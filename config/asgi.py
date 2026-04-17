@@ -4,6 +4,7 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from whitenoise import WhiteNoise
+from django.conf import settings  # <-- IMPORTANT
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 
@@ -11,17 +12,17 @@ django.setup()
 
 import chat.routing
 
-# Create the base Django ASGI app
+# Base Django ASGI app
 django_asgi_app = get_asgi_application()
 
-# Wrap it with WhiteNoise so it can serve /static/ and /media/
+# Wrap with WhiteNoise to serve static + media
 django_asgi_app = WhiteNoise(
     django_asgi_app,
-    root=os.getenv("MEDIA_ROOT")  # Serve media files
+    root=settings.STATIC_ROOT  # static files
 )
 
-# Explicitly add the media directory
-django_asgi_app.add_files(os.getenv("MEDIA_ROOT"), prefix="media/")
+# Add MEDIA files explicitly
+django_asgi_app.add_files(settings.MEDIA_ROOT, prefix="media/")
 
 application = ProtocolTypeRouter({
     "http": django_asgi_app,
