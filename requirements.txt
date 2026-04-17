@@ -1,3 +1,4 @@
+aiofiles==25.1.0
 asgiref==3.11.1
 attrs==25.4.0
 autobahn==25.12.2
@@ -43,4 +44,3 @@ ujson==5.11.0
 uvicorn==0.44.0
 whitenoise==6.12.0
 zope.interface==8.2
-aiofiles==24.1.0
