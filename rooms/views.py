@@ -231,20 +231,64 @@ def create_channel(request, room_id):
             messages.error(request, "Channel name cannot be empty.")
             return redirect('rooms:room_chat', room_id=room_id)
         
+        emoji = request.POST.get('emoji', '').strip()
+        color = request.POST.get('color', 'purple')
+        
         # Try to create (unique_together will catch duplicates)
         try:
             Channel.objects.create(
                 name=name,
+                emoji=emoji,
+                color=color,
                 room=room,
                 created_by=request.user
             )
-            messages.success(request, f"Channel '#{name}' created!")
+            messages.success(request, f"Channel '{emoji or '#'}{name}' created!")
         except IntegrityError:
             messages.error(request, f"A channel named '{name}' already exists.")
         
         return redirect('rooms:room_chat', room_id=room_id)
     
     return redirect('rooms:room_chat', room_id=room_id)
+
+
+@login_required
+def edit_channel(request, room_id, channel_id):
+    """Edit a channel - owner only."""
+    room = get_object_or_404(StudyRoom, id=room_id)
+    channel = get_object_or_404(Channel, id=channel_id, room=room)
+    
+    # Check if user is owner
+    membership = RoomMembership.objects.filter(
+        user=request.user, room=room, role='owner'
+    ).first()
+    
+    if not membership:
+        messages.error(request, "Only the room owner can edit channels.")
+        return redirect('rooms:channel_chat', room_id=room_id, channel_id=channel_id)
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        emoji = request.POST.get('emoji', '').strip()
+        color = request.POST.get('color', 'purple')
+        
+        if not name:
+            messages.error(request, "Channel name cannot be empty.")
+            return redirect('rooms:channel_chat', room_id=room_id, channel_id=channel_id)
+        
+        # Check for duplicate name (excluding current channel)
+        if Channel.objects.filter(room=room, name=name).exclude(id=channel_id).exists():
+            messages.error(request, f"A channel named '{name}' already exists.")
+            return redirect('rooms:channel_chat', room_id=room_id, channel_id=channel_id)
+        
+        channel.name = name
+        channel.emoji = emoji
+        channel.color = color
+        channel.save()
+        messages.success(request, f"Channel updated!")
+        return redirect('rooms:channel_chat', room_id=room_id, channel_id=channel_id)
+    
+    return redirect('rooms:channel_chat', room_id=room_id, channel_id=channel_id)
 
 
 @login_required

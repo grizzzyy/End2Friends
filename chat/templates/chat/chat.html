@@ -11,12 +11,12 @@
             <div class="relative">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
                     style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
-                    {{ room_name|first|upper }}
+                    {% if other_user %}{{ other_user.username|first|upper }}{% else %}{{ room_name|first|upper }}{% endif %}
                 </div>
                 <div class="online-dot"></div>
             </div>
             <div>
-                <h2 class="font-bold t-text-primary text-lg">#{{ room_name }}</h2>
+                <h2 class="font-bold t-text-primary text-lg">{% if other_user %}{{ other_user.username }}{% else %}#{{ room_name }}{% endif %}</h2>
                 <p class="text-xs t-text-accent">● Active now</p>
             </div>
         </div>
@@ -94,7 +94,7 @@
                     style="background: linear-gradient(135deg, #E8B4D4 0%, #C4B5FD 100%);">
                     <span class="material-symbols-outlined text-4xl text-white">chat</span>
                 </div>
-                <h3 class="text-xl font-bold t-text-primary mb-2">Welcome to #{{ room_name }}</h3>
+                <h3 class="text-xl font-bold t-text-primary mb-2">{% if other_user %}Chat with {{ other_user.username }}{% else %}Welcome to #{{ room_name }}{% endif %}</h3>
                 <p class="text-sm t-text-muted">This is the start of your conversation.<br>Say hello!</p>
             </div>
             {% endfor %}
@@ -115,79 +115,7 @@
             </div>
         </div>
     </main>
-
-    <!-- RIGHT SIDEBAR - Info Panel -->
-    <aside style="width:288px; background: var(--bg-sidebar) !important;
-                  border-left: 1px solid var(--border-card); border-right: none;">
-
-        <!-- Channel Info Header -->
-        <div class="p-6 text-center" style="border-bottom: 1px solid var(--border-card);">
-            <div class="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-white text-2xl font-bold"
-                style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
-                {{ room_name|first|upper }}
-            </div>
-            <h3 class="font-bold t-text-primary text-lg">#{{ room_name }}</h3>
-        </div>
-
-        <!-- Quick Links -->
-        <div class="p-4 space-y-1">
-            <div class="info-link">
-                <span class="material-symbols-outlined text-lg" style="color: var(--accent);">star</span>
-                <span class="t-text-secondary">Starred Messages</span>
-                <span class="ml-auto text-xs t-text-muted">(0)</span>
-            </div>
-            <div class="info-link">
-                <span class="material-symbols-outlined text-lg" style="color: var(--accent);">group</span>
-                <span class="t-text-secondary">Members</span>
-                <span class="ml-auto text-xs t-text-muted">({{ conversation.participants.count }})</span>
-            </div>
-        </div>
-
-        <!-- Members List -->
-        <div class="px-4 mb-2">
-            <p class="text-xs font-bold t-text-muted uppercase tracking-wide">Members</p>
-        </div>
-        <div class="flex-1 overflow-y-auto px-4 space-y-3">
-            {% for member in conversation.participants.all %}
-            <div class="flex items-center gap-3">
-                <div class="relative">
-                    {% if member.userprofile.avatar %}
-                    <img class="rounded-full w-9 h-9 object-cover flex-shrink-0"
-                        src="{{ member.userprofile.avatar.url }}" alt="Avatar">
-                    {% else %}
-                    <div class="flex items-center justify-center rounded-full w-9 h-9 flex-shrink-0 t-accent-icon-wrap">
-                        <span class="material-symbols-outlined" style="color: var(--accent);">person</span>
-                    </div>
-                    {% endif %}
-                    <div class="online-dot"></div>
-                </div>
-                <div>
-                    <p class="text-sm font-medium t-text-primary">{{ member.username }}</p>
-                    <p class="text-xs t-text-accent">Online</p>
-                </div>
-            </div>
-            {% empty %}
-            <p class="text-sm t-text-muted">No members yet</p>
-            {% endfor %}
-        </div>
-
-        <!-- Current User -->
-        <div class="p-4" style="border-top: 1px solid var(--border-card);">
-            <div class="flex items-center gap-3 mb-3">
-                {% if user.userprofile.avatar %}
-                <img class="rounded-full w-9 h-9 object-cover flex-shrink-0" src="{{ user.userprofile.avatar.url }}" alt="Avatar">
-                {% else %}
-                <div class="flex items-center justify-center rounded-full w-9 h-9 flex-shrink-0 t-accent-icon-wrap">
-                    <span class="material-symbols-outlined" style="color: var(--accent);">person</span>
-                </div>
-                {% endif %}
-                <div>
-                    <p class="text-sm font-medium t-text-primary">{{ request.user.username }}</p>
-                    <p class="text-xs t-text-accent">Online</p>
-                </div>
-            </div>
-        </div>
-    </aside>
+    <!-- Right sidebar removed - keeping direct messages UI simple -->
 </div>
 
 <script>

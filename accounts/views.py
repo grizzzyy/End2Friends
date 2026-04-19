@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rooms.models import StudyRoom
+from chat.models import Conversation
 
 User = get_user_model()
 
@@ -102,6 +103,12 @@ def dashboard_view(request):
     )[:5]
     activities = Activity.objects.filter(user=request.user)[:4]
     study_rooms = StudyRoom.objects.filter(memberships__user=request.user)[:4]
+    
+    # Get 3 most recent DM conversations
+    recent_conversations = Conversation.objects.filter(
+        participants=request.user,
+        is_private=True
+    ).prefetch_related('participants').order_by('-id')[:3]
 
     return render(
         request,
@@ -115,6 +122,7 @@ def dashboard_view(request):
             "reminders": reminders,
             "activities": activities,
             "study_rooms": study_rooms,
+            "recent_conversations": recent_conversations,
         },
     )
 
@@ -148,3 +156,69 @@ def profile_view(request):
         user_form = UpdateUserForm(instance=request.user)
         profile_form = UpdateProfileForm(instance=request.user.userprofile)
     return render(request, 'accounts/profile.html', {'user_form': user_form, 'profile_form': profile_form})
+
+
+@login_required
+def toggle_task(request, task_id):
+    """Toggle task completion status."""
+    from django.http import JsonResponse
+    from .models import Task
+    
+    task = Task.objects.filter(id=task_id, user=request.user).first()
+    if task:
+        task.completed = not task.completed
+        task.save()
+        return JsonResponse({'ok': True, 'completed': task.completed})
+    return JsonResponse({'ok': False}, status=404)
+
+
+@login_required
+def delete_task(request, task_id):
+    """Delete a task."""
+    from django.http import JsonResponse
+    from .models import Task
+    
+    task = Task.objects.filter(id=task_id, user=request.user).first()
+    if task:
+        task.delete()
+        return JsonResponse({'ok': True})
+    return JsonResponse({'ok': False}, status=404)
+
+
+@login_required
+def add_reminder(request):
+    """Add a new reminder."""
+    from django.http import JsonResponse
+    from .models import Reminder
+    from datetime import datetime
+    
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        remind_at = request.POST.get('remind_at', '')
+        
+        if title and remind_at:
+            try:
+                remind_datetime = datetime.fromisoformat(remind_at)
+                Reminder.objects.create(
+                    user=request.user,
+                    title=title,
+                    remind_at=remind_datetime
+                )
+                return redirect('dashboard')
+            except ValueError:
+                pass
+    
+    return redirect('dashboard')
+
+
+@login_required
+def dismiss_reminder(request, reminder_id):
+    """Dismiss/delete a reminder."""
+    from django.http import JsonResponse
+    from .models import Reminder
+    
+    reminder = Reminder.objects.filter(id=reminder_id, user=request.user).first()
+    if reminder:
+        reminder.delete()
+        return JsonResponse({'ok': True})
+    return JsonResponse({'ok': False}, status=404)

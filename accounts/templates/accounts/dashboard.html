@@ -18,23 +18,31 @@
         <div class="t-card p-6">
             <h2 class="text-lg font-bold t-text-primary mb-4">Today's Tasks</h2>
 
-            <ul class="space-y-3">
+            <ul id="taskList" class="space-y-3">
                 {% for task in tasks %}
-                <li class="t-list-item flex items-center gap-3 p-3">
-                    <input type="checkbox" class="w-4 h-4" style="accent-color: var(--accent);" {% if task.completed %}checked{% endif %}>
+                <li id="task-{{ task.id }}" class="t-list-item flex items-center gap-3 p-3 group">
+                    <input type="checkbox" class="w-4 h-4 cursor-pointer" style="accent-color: var(--accent);" 
+                           onchange="toggleTask({{ task.id }})"
+                           {% if task.completed %}checked{% endif %}>
                     <span class="w-2 h-2 rounded-full {% if task.priority == 'high' %}bg-red-500{% elif task.priority == 'medium' %}bg-yellow-500{% else %}bg-green-500{% endif %}"></span>
                     <div class="flex-1">
-                        <p class="t-text-primary text-sm">{{ task.title }}</p>
+                        <p class="t-text-primary text-sm task-title">{{ task.title }}</p>
                         <p class="t-text-muted text-xs">{{ task.channel }} · Due {{ task.due_date|date:"M j" }}</p>
                     </div>
+                    <button onclick="deleteTask({{ task.id }})" 
+                            class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition"
+                            title="Delete task">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
                 </li>
                 {% empty %}
-                <li class="text-center t-text-muted text-sm py-4">No tasks yet. You're all caught up!</li>
+                <li id="no-tasks" class="text-center t-text-muted text-sm py-4">No tasks yet. You're all caught up!</li>
                 {% endfor %}
             </ul>
 
             <form method="POST" class="flex flex-wrap gap-2 mt-4 items-center">
                 {% csrf_token %}
+                <input type="hidden" name="add_task" value="1">
                 {{ form.title }}
                 {{ form.due_date }}
                 {{ form.priority }}
@@ -47,22 +55,27 @@
         <div class="t-card p-6">
             <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-bold t-text-primary">Upcoming Reminders</h2>
-                <a href="#" class="text-sm t-text-accent hover:underline">View all</a>
+                <button onclick="openReminderModal()" class="text-sm t-text-accent hover:underline">+ Add</button>
             </div>
 
-            <ul class="space-y-3">
+            <ul id="reminderList" class="space-y-3">
                 {% for reminder in reminders %}
-                <li class="t-list-item flex items-center gap-3 p-3">
+                <li id="reminder-{{ reminder.id }}" class="t-list-item flex items-center gap-3 p-3 group">
                     <div class="t-accent-icon-wrap w-8 h-8 flex-shrink-0">
                         <span class="material-symbols-outlined text-sm" style="color: var(--accent);">schedule</span>
                     </div>
                     <div class="flex-1">
                         <p class="t-text-primary text-sm font-medium">{{ reminder.title }}</p>
-                        <p class="t-text-muted text-xs">{{ reminder.remind_at|date:"M j, g:i A" }} · {{ reminder.channel }}</p>
+                        <p class="t-text-muted text-xs">{{ reminder.remind_at|date:"M j, g:i A" }}</p>
                     </div>
+                    <button onclick="dismissReminder({{ reminder.id }})" 
+                            class="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-red-500 transition"
+                            title="Dismiss reminder">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
                 </li>
                 {% empty %}
-                <li class="text-center t-text-muted text-sm py-4">No upcoming reminders.</li>
+                <li id="no-reminders" class="text-center t-text-muted text-sm py-4">No upcoming reminders.</li>
                 {% endfor %}
             </ul>
         </div>
@@ -170,30 +183,38 @@
             </ul>
         </div>
 
-        <!-- Study Room Status Card -->
+        <!-- Recent Messages Card -->
         <div class="t-card p-6">
-            <h2 class="text-lg font-bold t-text-primary mb-4">Study Rooms</h2>
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold t-text-primary">Recent Messages</h2>
+                <a href="{% url 'messages_page' %}" class="text-sm t-text-accent hover:underline">View all</a>
+            </div>
 
             <ul class="space-y-3">
-                {% for room in study_rooms %}
-                <li class="t-list-item flex items-center gap-3 p-3">
-                    <div class="t-accent-icon-wrap w-8 h-8 flex-shrink-0">
-                        <span class="material-symbols-outlined text-sm" style="color: var(--accent);">groups</span>
-                    </div>
-                    <div class="flex-1">
-                        <p class="t-text-primary text-sm font-medium">{{ room.name }}</p>
-                        <p class="t-text-muted text-xs">
-                            {% if room.active_count > 0 %}
-                            {{ room.active_count }} member{{ room.active_count|pluralize }} studying now
-                            {% else %}
-                            No one active
-                            {% endif %}
-                        </p>
-                    </div>
-                    <button class="t-btn-primary text-xs px-3 py-1">Join</button>
+                {% for convo in recent_conversations %}
+                <li>
+                    <a href="{% url 'chat_room' convo.room_id %}"
+                        class="t-list-item flex items-center gap-3 p-3 cursor-pointer">
+                        <div class="t-accent-icon-wrap w-10 h-10 flex-shrink-0">
+                            <span style="color: var(--accent);" class="font-bold">
+                                {% for participant in convo.participants.all %}
+                                    {% if participant != request.user %}{{ participant.username|first|upper }}{% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                        <div class="flex-1">
+                            <p class="t-text-primary text-sm font-medium">
+                                {% for participant in convo.participants.all %}
+                                    {% if participant != request.user %}{{ participant.username }}{% endif %}
+                                {% endfor %}
+                            </p>
+                            <p class="t-text-muted text-xs">Click to open chat</p>
+                        </div>
+                        <span class="material-symbols-outlined text-sm" style="color: var(--accent);">chevron_right</span>
+                    </a>
                 </li>
                 {% empty %}
-                <li class="text-center t-text-muted text-sm py-4">No study rooms joined.</li>
+                <li class="text-center t-text-muted text-sm py-4">No recent conversations.</li>
                 {% endfor %}
             </ul>
         </div>
@@ -224,7 +245,46 @@
         </div>
     </div>
 
+    <!-- Add Reminder Modal -->
+    <div id="reminderModal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-lg p-6 max-w-md mx-4 w-full">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-purple-600">schedule</span>
+                </div>
+                <h2 class="text-lg font-bold text-gray-800">Add Reminder</h2>
+            </div>
+            <form action="{% url 'add_reminder' %}" method="POST" class="space-y-4">
+                {% csrf_token %}
+                <div>
+                    <label for="reminder_title" class="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input type="text" id="reminder_title" name="title" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        placeholder="e.g. Meeting with team">
+                </div>
+                <div>
+                    <label for="remind_at" class="block text-sm font-medium text-gray-700 mb-1">Date & Time</label>
+                    <input type="datetime-local" id="remind_at" name="remind_at" required
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                <div class="flex gap-3 justify-end">
+                    <button type="button" onclick="closeReminderModal()"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                        Add Reminder
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
+        const csrfToken = '{{ csrf_token }}';
+
+        // Pomodoro Timer
         const WORK_DURATION = 25 * 60;
         const BREAK_DURATION = 5 * 60;
 
@@ -331,6 +391,76 @@
                 window.location.href = '/rooms/join/' + code + '/';
             }
         });
+
+        // Reminder Modal Functions
+        function openReminderModal() {
+            document.getElementById('reminderModal').classList.remove('hidden');
+            document.getElementById('reminderModal').classList.add('flex');
+            document.getElementById('reminder_title').focus();
+        }
+
+        function closeReminderModal() {
+            document.getElementById('reminderModal').classList.add('hidden');
+            document.getElementById('reminderModal').classList.remove('flex');
+        }
+
+        // Task Functions
+        async function toggleTask(taskId) {
+            const res = await fetch(`/accounts/tasks/${taskId}/toggle/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken }
+            });
+            const data = await res.json();
+            if (data.ok && data.completed) {
+                // Task completed - fade out and remove
+                const taskEl = document.getElementById(`task-${taskId}`);
+                taskEl.style.opacity = '0.5';
+                taskEl.querySelector('.task-title').style.textDecoration = 'line-through';
+                setTimeout(() => {
+                    taskEl.remove();
+                    checkEmptyTasks();
+                }, 500);
+            }
+        }
+
+        async function deleteTask(taskId) {
+            const res = await fetch(`/accounts/tasks/${taskId}/delete/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken }
+            });
+            const data = await res.json();
+            if (data.ok) {
+                document.getElementById(`task-${taskId}`).remove();
+                checkEmptyTasks();
+            }
+        }
+
+        function checkEmptyTasks() {
+            const list = document.getElementById('taskList');
+            if (list.children.length === 0) {
+                list.innerHTML = '<li id="no-tasks" class="text-center text-gray-400 text-sm py-4">No tasks yet. You\'re all caught up!</li>';
+            }
+        }
+
+        // Reminder Functions
+        async function dismissReminder(reminderId) {
+            const res = await fetch(`/accounts/reminders/${reminderId}/dismiss/`, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken }
+            });
+            const data = await res.json();
+            if (data.ok) {
+                document.getElementById(`reminder-${reminderId}`).remove();
+                checkEmptyReminders();
+            }
+        }
+
+        function checkEmptyReminders() {
+            const list = document.getElementById('reminderList');
+            if (list.children.length === 0) {
+                list.innerHTML = '<li id="no-reminders" class="text-center text-gray-400 text-sm py-4">No upcoming reminders.</li>';
+            }
+        }
     </script>
 </main>
 {% endblock %}
