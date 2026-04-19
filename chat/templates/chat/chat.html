@@ -2,12 +2,12 @@
 {% block title %}Chat - End2Friend{% endblock %}
 {% block content %}
 
-<div class="flex-1 flex h-screen bg-gray-100">
+<div class="flex-1 flex h-screen" style="background: var(--bg-page);">
     <!-- CHAT AREA -->
-    <main class="flex-1 flex flex-col bg-purple-50">
+    <main class="flex-1 flex flex-col" style="background: var(--bg-page);">
 
         <!-- Chat Header -->
-        <div class="p-4 bg-white border-b border-gray-200 flex items-center gap-4">
+        <div class="p-4 flex items-center gap-4" style="background: var(--bg-card); border-bottom: 1px solid var(--border-card);">
             <div class="relative">
                 <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg"
                     style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
@@ -16,8 +16,8 @@
                 <div class="online-dot"></div>
             </div>
             <div>
-                <h2 class="font-bold text-gray-800 text-lg">{% if other_user %}{{ other_user.username }}{% else %}#{{ room_name }}{% endif %}</h2>
-                <p class="text-xs text-purple-600">● Active now</p>
+                <h2 class="font-bold t-text-primary text-lg">{% if other_user %}{{ other_user.username }}{% else %}#{{ room_name }}{% endif %}</h2>
+                <p class="text-xs t-text-accent">● Active now</p>
             </div>
         </div>
 
@@ -26,7 +26,8 @@
             {% for message in messages %}
             {% if message.is_deleted %}
             <div class="flex justify-end">
-                <p class="text-xs text-gray-400 italic px-4 py-2 bg-white/60 rounded-full border border-gray-200">
+                <p class="text-xs t-text-muted italic px-4 py-2 rounded-full"
+                   style="background: var(--bg-item); border: 1px solid var(--border-card);">
                     This message was deleted.
                 </p>
             </div>
@@ -34,29 +35,28 @@
             <!-- Sent message (right side) -->
             <div class="flex justify-end message-row group" data-msg-id="{{ message.id }}">
                 <div class="relative max-w-md">
-                    <!-- Action bar -->
                     <div class="action-bar">
                         <button onclick="startEdit('{{ message.id }}')" title="Edit message" class="action-btn">
-                            <span class="material-symbols-outlined text-[18px] text-purple-500">edit</span>
+                            <span class="material-symbols-outlined text-[18px]" style="color: var(--accent);">edit</span>
                         </button>
                         <button onclick="deleteMessage('{{ message.id }}')" title="Delete message" class="action-btn">
                             <span class="material-symbols-outlined text-[18px] text-red-400">delete</span>
                         </button>
                     </div>
-
-                    <p class="text-xs text-gray-400 text-right mb-1">{{ message.timestamp|timesince }} ago</p>
+                    <p class="text-xs t-text-muted text-right mb-1">{{ message.timestamp|timesince }} ago</p>
                     <div id="msg-edit-{{ message.id }}" class="msg-sent px-4 py-3 text-sm shadow-sm">
                         {{ message.content }}
                     </div>
-
-                    <!-- Inline edit -->
                     <div id="edit-{{ message.id }}" class="hidden">
-                        <textarea id="edit-input-{{ message.id }}" class="w-full rounded-2xl px-4 py-3 text-sm text-gray-800
-               border-2 border-purple-400 focus:outline-none focus:border-purple-600
-               resize-none bg-white shadow-sm" rows="2">{{ message.content }}</textarea>
+                        <textarea id="edit-input-{{ message.id }}"
+                            class="w-full rounded-2xl px-4 py-3 text-sm resize-none shadow-sm"
+                            style="background: var(--bg-card); color: var(--text-primary);
+                                   border: 2px solid var(--accent); outline: none;"
+                            rows="2">{{ message.content }}</textarea>
                         <div class="flex gap-2 mt-1 justify-end">
                             <button onclick="cancelEdit('{{ message.id }}')"
-                                class="text-xs text-gray-400 hover:text-gray-600 px-3 py-1 rounded-full border border-gray-200 bg-white">
+                                class="text-xs t-text-muted px-3 py-1 rounded-full"
+                                style="border: 1px solid var(--border-card); background: var(--bg-card);">
                                 Cancel
                             </button>
                             <button onclick="submitEdit('{{ message.id }}')"
@@ -75,41 +75,39 @@
                 <img class="rounded-full w-11 h-11 object-cover flex-shrink-0 mt-2"
                     src="{{ message.user.userprofile.avatar.url }}" alt="Avatar">
                 {% else %}
-                <div class="flex items-center justify-center rounded-full w-11 h-11 bg-purple-100 flex-shrink-0">
-                    <span class="material-symbols-outlined text-purple-600">person</span>
+                <div class="flex items-center justify-center rounded-full w-11 h-11 flex-shrink-0 t-accent-icon-wrap">
+                    <span class="material-symbols-outlined" style="color: var(--accent);">person</span>
                 </div>
                 {% endif %}
                 <div class="max-w-md">
-                    <p class="text-xs text-gray-500 mb-1">
-                        <span class="font-medium text-gray-700">{{ message.user.username }}</span>
+                    <p class="text-xs t-text-secondary mb-1">
+                        <span class="font-medium t-text-primary">{{ message.user.username }}</span>
                         · {{ message.timestamp|timesince }} ago
                     </p>
-                    <div class="msg-received px-4 py-3 text-sm shadow-sm">
-                        {{ message.content }}
-                    </div>
+                    <div class="msg-received px-4 py-3 text-sm shadow-sm">{{ message.content }}</div>
                 </div>
             </div>
             {% endif %}
             {% empty %}
-            <!-- Empty state -->
             <div class="flex flex-col items-center justify-center h-full text-center">
                 <div class="w-20 h-20 rounded-full flex items-center justify-center mb-4"
                     style="background: linear-gradient(135deg, #E8B4D4 0%, #C4B5FD 100%);">
                     <span class="material-symbols-outlined text-4xl text-white">chat</span>
                 </div>
-                <h3 class="text-xl font-bold text-gray-700 mb-2">{% if other_user %}Chat with {{ other_user.username }}{% else %}Welcome to #{{ room_name }}{% endif %}</h3>
-                <p class="text-sm text-gray-400">This is the start of your conversation.<br>Say hello!</p>
-                <p class="text-center text-gray-400 text-sm mt-8">No messages yet. Say hello!</p>
+                <h3 class="text-xl font-bold t-text-primary mb-2">{% if other_user %}Chat with {{ other_user.username }}{% else %}Welcome to #{{ room_name }}{% endif %}</h3>
+                <p class="text-sm t-text-muted">This is the start of your conversation.<br>Say hello!</p>
             </div>
             {% endfor %}
         </div>
 
         <!-- Input Area -->
-        <div class="p-4 bg-white border-t border-gray-200">
+        <div class="p-4" style="background: var(--bg-card); border-top: 1px solid var(--border-card);">
             <div class="flex gap-3 items-center">
                 <input id="messageInput" type="text" placeholder="Type a message..."
-                    class="flex-1 bg-gray-100 rounded-full px-5 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-400">
-                <button id="sendBtn"
+                    class="flex-1 rounded-full px-5 py-3 text-sm"
+                    style="background: var(--bg-input); color: var(--text-primary);
+                           border: none; outline: none;">
+                <button id="sendBtn" onclick="sendMessage()"
                     class="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition hover:opacity-90"
                     style="background: linear-gradient(135deg, #9B76B4 0%, #E8B4D4 100%);">
                     <span class="material-symbols-outlined">send</span>
@@ -126,20 +124,14 @@
     const chatLog = document.getElementById('chat-log');
     const csrfToken = "{{ csrf_token }}";
     chatLog.scrollTop = chatLog.scrollHeight;
-const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-const socket = new WebSocket(wsProtocol + window.location.host + "/ws/chat/" + roomName + "/");
+    const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const socket = new WebSocket(wsProtocol + window.location.host + "/ws/chat/" + roomName + "/");
 
     socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        // Remove empty state if present
         const emptyState = chatLog.querySelector('.flex.flex-col.items-center');
         if (emptyState) emptyState.remove();
 
-        const isSent = data.username === currentUser;
-        const isOwn = data.username === "{{ request.user.username }}";
-        const div = document.createElement('div');
-
-        // edit and delete for other user
         if (data.type === 'message_edited') {
             const bubble = document.getElementById(`msg-edit-${data.message_id}`);
             if (bubble) bubble.textContent = data.content;
@@ -151,39 +143,34 @@ const socket = new WebSocket(wsProtocol + window.location.host + "/ws/chat/" + r
             if (row) {
                 row.className = 'flex';
                 row.removeAttribute('data-msg-id');
-                row.innerHTML = `<p class="text-xs text-gray-400 italic px-4 py-2 bg-white/60 rounded-full border border-gray-200">This message was deleted.</p>`;
+                row.innerHTML = `<p class="text-xs italic px-4 py-2 rounded-full" style="color:var(--text-muted);background:var(--bg-item);border:1px solid var(--border-card)">This message was deleted.</p>`;
             }
             return;
         }
 
+        const isSent = data.username === currentUser;
+        const div = document.createElement('div');
+
         if (isSent) {
-            // Sent message (right side, purple)
             div.className = 'flex justify-end';
             div.innerHTML = `
                 <div class="max-w-md">
-                    <p class="text-xs text-gray-400 text-right mb-1">just now</p>
-                    <div class="msg-sent px-4 py-3 text-sm shadow-sm">
-                        ${data.message}
-                    </div>
-                </div>
-            `;
+                    <p class="text-xs text-right mb-1" style="color:var(--text-muted)">just now</p>
+                    <div class="msg-sent px-4 py-3 text-sm shadow-sm">${data.message}</div>
+                </div>`;
         } else {
-            // Received message (left side, white)
             div.className = 'flex gap-3';
             div.innerHTML = `
-                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0" style="background: linear-gradient(135deg, #7C3AED 0%, #C4B5FD 100%);">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold flex-shrink-0"
+                     style="background: linear-gradient(135deg, #7C3AED 0%, #C4B5FD 100%);">
                     ${data.username[0].toUpperCase()}
                 </div>
                 <div class="max-w-md">
-                    <p class="text-xs text-gray-500 mb-1">
-                        <span class="font-medium text-gray-700">${data.username}</span>
-                        · just now
+                    <p class="text-xs mb-1" style="color:var(--text-secondary)">
+                        <span class="font-medium" style="color:var(--text-primary)">${data.username}</span> · just now
                     </p>
-                    <div class="msg-received px-4 py-3 text-sm shadow-sm">
-                        ${data.message}
-                    </div>
-                </div>
-            `;
+                    <div class="msg-received px-4 py-3 text-sm shadow-sm">${data.message}</div>
+                </div>`;
         }
 
         chatLog.appendChild(div);
@@ -220,14 +207,12 @@ const socket = new WebSocket(wsProtocol + window.location.host + "/ws/chat/" + r
     async function submitEdit(id) {
         const content = document.getElementById(`edit-input-${id}`).value.trim();
         if (!content) return;
-
         const res = await fetch(`/chat/messages/${id}/edit/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
             body: JSON.stringify({ content }),
         });
         const data = await res.json();
-
         if (data.ok) {
             document.getElementById(`msg-edit-${id}`).textContent = data.content;
             cancelEdit(id);
@@ -237,56 +222,31 @@ const socket = new WebSocket(wsProtocol + window.location.host + "/ws/chat/" + r
 
     async function deleteMessage(id) {
         if (!confirm('Delete this message?')) return;
-
         const res = await fetch(`/chat/messages/${id}/delete/`, {
             method: 'POST',
             headers: { 'X-CSRFToken': csrfToken },
         });
         const data = await res.json();
-
         if (data.ok) {
             const row = document.querySelector(`.message-row[data-msg-id="${id}"]`);
             if (row) {
                 row.className = 'flex justify-end';
                 row.removeAttribute('data-msg-id');
-                row.innerHTML = `<p class="text-xs text-gray-400 italic px-4 py-2 bg-white/60 rounded-full border border-gray-200">This message was deleted.</p>`;
+                row.innerHTML = `<p class="text-xs italic px-4 py-2 rounded-full" style="color:var(--text-muted);background:var(--bg-item);border:1px solid var(--border-card)">This message was deleted.</p>`;
             }
             socket.send(JSON.stringify({ type: 'delete', message_id: id }));
         }
     }
-
 </script>
+
 <style>
-    body {
-        font-family: 'Varela Round', sans-serif;
-    }
-
-    /* Channel item in sidebar */
-    .channel-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.15s;
-    }
-
-    .channel-item:hover {
-        background: #f3e8ff;
-    }
-
-    .channel-item.active {
-        background: #ede9fe;
-    }
-
     /* Online status dot */
     .online-dot {
         width: 10px;
         height: 10px;
-        background: #9B76B4;
+        background: var(--accent);
         border-radius: 50%;
-        border: 2px solid white;
+        border: 2px solid var(--bg-sidebar);
         position: absolute;
         bottom: 0;
         right: 0;
@@ -300,9 +260,10 @@ const socket = new WebSocket(wsProtocol + window.location.host + "/ws/chat/" + r
     }
 
     .msg-received {
-        background: white;
-        color: #374151;
+        background: var(--bg-card);
+        color: var(--text-primary);
         border-radius: 18px 18px 18px 4px;
+        border: 1px solid var(--border-card);
     }
 
     /* Info panel link */
@@ -312,14 +273,12 @@ const socket = new WebSocket(wsProtocol + window.location.host + "/ws/chat/" + r
         gap: 10px;
         padding: 10px 12px;
         border-radius: 8px;
-        color: #6b7280;
         font-size: 14px;
-        transition: all 0.15s;
+        cursor: pointer;
+        transition: background 0.15s;
     }
-
     .info-link:hover {
-        background: #f3e8ff;
-        color: #7c3aed;
+        background: var(--bg-nav-hover);
     }
 
     .action-bar {
@@ -333,8 +292,8 @@ const socket = new WebSocket(wsProtocol + window.location.host + "/ws/chat/" + r
         gap: 4px;
         opacity: 0;
         pointer-events: none;
-        background: white;
-        border: 1px solid rgb(205, 197, 210);
+        background: var(--bg-card);
+        border: 1px solid var(--border-card);
         border-radius: 15px;
         padding: 4px;
     }
@@ -351,13 +310,12 @@ const socket = new WebSocket(wsProtocol + window.location.host + "/ws/chat/" + r
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background: white;
+        background: var(--bg-card);
         cursor: pointer;
         transition: all 0.15s;
     }
-
     .action-btn:hover {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         transform: scale(1.1);
     }
 </style>
