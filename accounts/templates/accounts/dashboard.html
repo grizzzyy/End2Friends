@@ -116,37 +116,6 @@
         </div>
     </div>
 
-    <!-- Pomodoro Status Card -->
-    <div class="t-card p-6 mt-6 max-w-md mx-auto">
-        <h2 class="text-lg font-bold t-text-primary mb-4 text-center">Pomodoro Timer</h2>
-
-        <div class="flex flex-col items-center gap-4">
-            <!-- Circular Indicator -->
-            <div class="relative w-28 h-28">
-                <svg class="w-28 h-28 transform -rotate-90">
-                    <circle cx="56" cy="56" r="50" stroke="var(--accent-light)" stroke-width="8" fill="none"></circle>
-                    <circle id="pomo-progress" cx="56" cy="56" r="50" stroke="var(--accent)" stroke-width="8"
-                        fill="none" stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"></circle>
-                </svg>
-                <div class="absolute inset-0 flex items-center justify-center">
-                    <span id="pomo-time" class="text-lg font-bold t-text-primary">25:00</span>
-                </div>
-            </div>
-
-            <!-- Status -->
-            <div class="text-center">
-                <p class="text-sm t-text-secondary mb-1">Status</p>
-                <p id="pomo-status" class="t-text-primary font-medium">Not started</p>
-            </div>
-
-            <!-- Buttons -->
-            <div class="flex gap-2">
-                <button id="pomo-btn" onclick="togglePomodoro()" class="t-btn-primary px-5 py-2 text-sm">Start</button>
-                <button id="pomo-reset" onclick="resetPomodoro()" class="t-btn-secondary px-5 py-2 text-sm">Reset</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Activity & Study Rooms Row -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
 
@@ -284,94 +253,6 @@
     <script>
         const csrfToken = '{{ csrf_token }}';
 
-        // Pomodoro Timer
-        const WORK_DURATION = 25 * 60;
-        const BREAK_DURATION = 5 * 60;
-
-        let timeLeft = WORK_DURATION;
-        let isRunning = false;
-        let isBreak = false;
-        let timerInterval = null;
-
-        const progressCircle = document.getElementById('pomo-progress');
-        const timeDisplay = document.getElementById('pomo-time');
-        const statusText = document.getElementById('pomo-status');
-        const toggleBtn = document.getElementById('pomo-btn');
-        const circumference = 314;
-
-        function updateDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-            const totalDuration = isBreak ? BREAK_DURATION : WORK_DURATION;
-            const progress = timeLeft / totalDuration;
-            progressCircle.style.strokeDashoffset = circumference * progress;
-
-            const root = document.documentElement;
-            const accentColor = getComputedStyle(root).getPropertyValue('--accent').trim();
-            progressCircle.style.stroke = isBreak ? '#f5b4e0' : accentColor;
-        }
-
-        function updateStatus() {
-            if (!isRunning && timeLeft === (isBreak ? BREAK_DURATION : WORK_DURATION)) {
-                statusText.textContent = isBreak ? 'Break ready' : 'Not started';
-                toggleBtn.textContent = 'Start';
-            } else if (isRunning) {
-                const minutes = Math.floor(timeLeft / 60);
-                statusText.textContent = isBreak ? 'Break in progress' : `${minutes} minutes remaining`;
-                toggleBtn.textContent = 'Pause';
-            } else {
-                const minutes = Math.floor(timeLeft / 60);
-                statusText.textContent = `Paused - ${minutes}m left`;
-                toggleBtn.textContent = 'Resume';
-            }
-        }
-
-        function togglePomodoro() {
-            if (isRunning) {
-                clearInterval(timerInterval);
-                isRunning = false;
-            } else {
-                isRunning = true;
-                timerInterval = setInterval(() => {
-                    timeLeft--;
-                    updateDisplay();
-                    updateStatus();
-
-                    if (timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        isRunning = false;
-
-                        if (isBreak) {
-                            isBreak = false;
-                            timeLeft = WORK_DURATION;
-                            statusText.textContent = 'Break complete! Ready to focus.';
-                        } else {
-                            isBreak = true;
-                            timeLeft = BREAK_DURATION;
-                            statusText.textContent = 'Great work! Take a break.';
-                        }
-                        toggleBtn.textContent = 'Start';
-                        updateDisplay();
-                    }
-                }, 1000);
-            }
-            updateStatus();
-        }
-
-        function resetPomodoro() {
-            clearInterval(timerInterval);
-            isRunning = false;
-            isBreak = false;
-            timeLeft = WORK_DURATION;
-            updateDisplay();
-            updateStatus();
-        }
-
-        updateDisplay();
-        updateStatus();
-
         function openJoinModal() {
             document.getElementById('joinModal').classList.remove('hidden');
             document.getElementById('joinModal').classList.add('flex');
@@ -392,7 +273,6 @@
             }
         });
 
-        // Reminder Modal Functions
         function openReminderModal() {
             document.getElementById('reminderModal').classList.remove('hidden');
             document.getElementById('reminderModal').classList.add('flex');
@@ -404,7 +284,6 @@
             document.getElementById('reminderModal').classList.remove('flex');
         }
 
-        // Task Functions
         async function toggleTask(taskId) {
             const res = await fetch(`/accounts/tasks/${taskId}/toggle/`, {
                 method: 'POST',
@@ -412,7 +291,6 @@
             });
             const data = await res.json();
             if (data.ok && data.completed) {
-                // Task completed - fade out and remove
                 const taskEl = document.getElementById(`task-${taskId}`);
                 taskEl.style.opacity = '0.5';
                 taskEl.querySelector('.task-title').style.textDecoration = 'line-through';
@@ -438,11 +316,10 @@
         function checkEmptyTasks() {
             const list = document.getElementById('taskList');
             if (list.children.length === 0) {
-                list.innerHTML = '<li id="no-tasks" class="text-center text-gray-400 text-sm py-4">No tasks yet. You\'re all caught up!</li>';
+                list.innerHTML = '<li id="no-tasks" class="text-center t-text-muted text-sm py-4">No tasks yet. You\'re all caught up!</li>';
             }
         }
 
-        // Reminder Functions
         async function dismissReminder(reminderId) {
             const res = await fetch(`/accounts/reminders/${reminderId}/dismiss/`, {
                 method: 'POST',
@@ -458,7 +335,7 @@
         function checkEmptyReminders() {
             const list = document.getElementById('reminderList');
             if (list.children.length === 0) {
-                list.innerHTML = '<li id="no-reminders" class="text-center text-gray-400 text-sm py-4">No upcoming reminders.</li>';
+                list.innerHTML = '<li id="no-reminders" class="text-center t-text-muted text-sm py-4">No upcoming reminders.</li>';
             }
         }
     </script>
