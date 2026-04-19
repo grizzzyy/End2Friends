@@ -120,12 +120,13 @@
                 <span class="material-symbols-outlined">chevron_left</span>
             </button>
 
-            <!-- Logo -->
-            <div class="p-4 flex items-center gap-2 text-purple-600 border-b border-purple-100"
-                style="min-height:64px;">
+            <!-- Logo - clickable to dashboard -->
+            <a href="{% url 'dashboard' %}"
+               class="p-4 flex items-center gap-2 text-purple-600 border-b border-purple-100 hover:bg-purple-50 transition"
+               style="min-height:64px;">
                 <span class="material-symbols-outlined flex-shrink-0">drone_2</span>
                 <h1 class="font-bold text-lg nav-text">End2Friend</h1>
-            </div>
+            </a>
 
             <!-- User -->
             <div class="p-4 flex items-center gap-3 border-b border-purple-100">

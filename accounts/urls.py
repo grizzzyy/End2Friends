@@ -11,4 +11,10 @@ urlpatterns = [
     path("profile/", views.profile_view, name="profile"),
     path("messages/", views.messages_view, name="messages_page"),
     path("settings/", views.settings_view, name="settings_page"),
+    # Task actions
+    path("tasks/<int:task_id>/toggle/", views.toggle_task, name="toggle_task"),
+    path("tasks/<int:task_id>/delete/", views.delete_task, name="delete_task"),
+    # Reminder actions
+    path("reminders/add/", views.add_reminder, name="add_reminder"),
+    path("reminders/<int:reminder_id>/dismiss/", views.dismiss_reminder, name="dismiss_reminder"),
 ]

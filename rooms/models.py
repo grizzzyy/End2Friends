@@ -101,7 +101,20 @@ class RoomInvite(models.Model):
 
 
 class Channel(models.Model):
+    COLOR_CHOICES = [
+        ('purple', 'Purple'),
+        ('blue', 'Blue'),
+        ('green', 'Green'),
+        ('red', 'Red'),
+        ('orange', 'Orange'),
+        ('pink', 'Pink'),
+        ('yellow', 'Yellow'),
+        ('gray', 'Gray'),
+    ]
+
     name = models.CharField(max_length=100)
+    emoji = models.CharField(max_length=10, blank=True, default='')  # Channel emoji prefix
+    color = models.CharField(max_length=20, choices=COLOR_CHOICES, default='purple')
 
     room = models.ForeignKey(
         "StudyRoom",
@@ -122,6 +135,11 @@ class Channel(models.Model):
 
     def __str__(self):
         return f"#{self.name} in {self.room}"
+    
+    @property
+    def display_prefix(self):
+        """Return emoji if set, otherwise #"""
+        return self.emoji if self.emoji else '#'
 
 
 class Message(models.Model):
